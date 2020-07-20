@@ -1,59 +1,18 @@
 
-# Wrapper the executes the C code with the .C function
-# that runs MCMC algorithm used to sample from posterior
-# distribution of joint eCAR model.
-#
-
-eCAR <- function(y,x,W,D,
-                 modelPriors = c(0, 100^2, 10, 100),
-                 draws=10000,burn=5000,thin=5, verbose=TRUE){
-
-  out <- NULL
-
-  nout <- (draws-burn)/thin
-  cat("nout =", nout, "\n")
-
-  nobs <- length(y)
-  cat("nobs = ", nobs, "\n")
-
-  egn <- eigen(diag(1/sqrt(D)) %*% W %*% diag(1/sqrt(D)))$values
-  evals <- egn$values
-  evecs <- egn$vectors
-
-  P <- t(evecs) %*% diag(1/sqrt(D))
-  Pinv <- solve(P)
-
-  beta <- alpha <- tau <- sig2x <- rhox <- rhoz <- rep(1, nout)
-  WAIC <- lpml <- rep(1,1)
-
-  C.out <- .C("mcmcloop",
-              as.integer(draws), as.integer(burn), as.integer(thin),
-              as.integer(nobs), as.double(y), as.double(x),
-              as.double(t(W)), as.double(D), as.double(evals),
-              as.double(t(P)), as.double(t(Pinv)),
-              as.double(modelPriors),as.integer(verbose),
-              beta.out=as.double(beta), alpha.out=as.double(alpha),
-              tau.out=as.double(tau), sig2x.out=as.double(sig2x),
-              rhox.out=as.integer(rhox), rhoz.out=as.integer(rhoz),
-              WAIC.out=as.double(WAIC), lpml.out=as.double(lpml))
 
 
-  out$beta <- matrix(C.out$beta.out, nrow=nout, byrow=TRUE)
-  out$alpha <- matrix(C.out$alpha.out, nrow=nout, byrow=TRUE)
-  out$tau <- matrix(C.out$tau.out, nrow=nout, byrow=TRUE)
-  out$sig2x <- matrix(C.out$sig2x.out, nrow=nout, byrow=TRUE)
-  out$rhox <- matrix(C.out$rhox.out, nrow=nout, byrow=TRUE)
-  out$rhoz <- matrix(C.out$rhoz.out, nrow=nout, byrow=TRUE)
-  out$WAIC <- C.out$WAIC.out
-  out$lpml <- C.out$lpml.out
-  out
+# HPD calculator (see TeachingDemos)
+emp.hpd <- function(x, conf=0.95){
+  conf <- min(conf, 1-conf)
+  n <- length(x)
+  nn <- round( n*conf )
+	x <- sort(x)
+	xx <- x[ (n-nn+1):n ] - x[1:nn]
+	m <- min(xx)
+	nnn <- which(xx==m)[1]
+	return( c( x[ nnn ], x[ n-nn+nnn ] ) )
 }
 
-
-
-# MHcand - values of proposal distributions for MH steps
-#   1 - tau
-#   2 - sig2
 
 
 # Wrapper to fit the joint Leroux model
@@ -149,6 +108,7 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   }
 
 
+
   out$beta <- matrix(C.out$beta.out, nrow=nout, byrow=TRUE)
   out$alpha <- matrix(C.out$alpha.out, nrow=nout, byrow=TRUE)
   out$tau <- matrix(C.out$tau.out, nrow=nout, byrow=TRUE)
@@ -165,6 +125,25 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   }
   if(ncov>0) out$eta <- matrix(C.out$eta.out, nrow=nout, byrow=TRUE)
   if(model=="Negative Binomial") out$nb_r = matrix(C.out$r.out, nrow=nout, byrow=TRUE)
+
+  # Produce beta as a function of eigen-value
+  Dseq <- seq(min(evals), max(evals), length=1000)
+  c.beta <- matrix(NA, nrow=nout, ncol=length(Dseq))
+  for(t in 1:nout){
+    c.beta[t,] <- out$beta[t] + out$alpha[t]*sqrt((1-out$lamx[t]+out$lamx[t]*Dseq)/(1-out$lamz[t]+out$lamz[t]*Dseq))
+  }
+
+  mn.b <- apply(exp(c.beta),2,function(x) mean(x))
+  ci.b <- apply(exp(c.beta),2,function(x) emp.hpd(x))
+
+  if(model=="Gaussian"){
+    out$mn.beta <-  matrix(apply(c.beta,2,function(x) mean(x)),nrow=1000,byrow=TRUE)
+    out$ci.beta <-  matrix(apply(c.beta,2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)
+  }
+  if(model!="Gaussian"){
+    out$mn.beta <-  matrix(apply(exp(c.beta),2,function(x) mean(x)),nrow=1000,byrow=TRUE)
+    out$ci.beta <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)
+  }
   out
 }
 

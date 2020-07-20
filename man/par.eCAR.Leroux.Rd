@@ -38,17 +38,21 @@ par.eCAR.Leroux(y, x, W,
 
 \item{model}{Specifies the likelihood or data model.  Options are "Gaussian", "Poisson", "Binomial", "Negative Binomial"}
 
+
+\item{joint_prior_lamx_lamz}{Logical.  If TRUE, then a uniform prior on space such that lamz > lamx.  If FALSE, independent beta priors are used.  }
+
+
 \item{m}{prior mean for (beta, alpha), where alpha = rho(sigz/sigx).  default is 0.}
 
 \item{s2}{prior variance for (beta, alpha),where alpha = rho(sigz/sigx). default is 10}
 
-\item{alamx}{prior shape1 parameter for lam.x, default is 1}
+\item{alamx}{prior shape1 parameter for lam.x, default is 1. Only used if joint_prior_lamx_lamz = FALSE}
 
-\item{blamx}{prior shape2 parameter for lam.x, default is 1}
+\item{blamx}{prior shape2 parameter for lam.x, default is 1. Only used if joint_prior_lamx_lamz = FALSE}
 
-\item{alamz}{prior shape1 parameter for lam.z, default is 1}
+\item{alamz}{prior shape1 parameter for lam.z, default is 1. Only used if joint_prior_lamx_lamz = FALSE}
 
-\item{blamz}{prior shape2 parameter for lam.z, default is 1}
+\item{blamz}{prior shape2 parameter for lam.z, default is 1. Only used if joint_prior_lamx_lamz = FALSE}
 
 \item{asig}{prior shape parameter for sigma2, default is 1}
 
@@ -74,6 +78,10 @@ par.eCAR.Leroux(y, x, W,
 
 \item{s2x}{prior variance parameter for eta, default is 100. Only used for negative binomial model}
 
+\item{tau_cand_sd}{standard deviation for candidate density in Metropolis step for tau.  Default is 1}
+
+\item{sig2_cand_sd}{standard deviation for candidate density in Metropolis step for tau.  Default is 1}
+
 \item{draws}{number of MCMC iterates to be collected. default is 10000}
 
 \item{burn}{number of MCMC iterates discared as burn-in. default is 5000}
@@ -82,6 +90,8 @@ par.eCAR.Leroux(y, x, W,
 
 \item{verbose}{If TRUE, then details associated with data being fit are printed to screen along with MCMC iterate counter}
 }
+
+
 \value{
 A list containing arrays filled with MCMC iterates corresponding to model parameters. Letting T = (draws - burn)/thin be the number of MCMC iterates collecte, the output list contains the following
 
@@ -113,71 +123,37 @@ A list containing arrays filled with MCMC iterates corresponding to model parame
 }
 \examples{
 
-  # Our R-package
-  library(eCAR)
-  library(spdep) # to create a neigbhorhood matrix
+# Our R-package
+library(eCAR)
+
+data(lipcancer)
+
+
+W <- lipcancer$neighborhood.Matrix
+M <- diag(apply(W,1,sum))
+R <- M-W
+e.dec <- eigen(R)
+e.val <- e.dec$values
+D.eigval = diag(e.val)
+
+
+Y <- lipcancer$data$observed
+X <- lipcancer$data$pcaff
+E <- lipcancer$data$expected
+
+set.seed(101)
+fit1 <- par.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL, model="Poisson",
+                         draws=25000, burn=5000, thin=1, verbose=FALSE,
+                         joint_prior_lamx_lamz=FALSE, m=0, s2=4)
 
 
 
-  n1 <- n2 <- 20
-  n <- n1*n2
-  W <- nb2mat(cell2nb(n1, n2, type = "queen"), zero.policy=TRUE, style="B")
-  M <- diag(apply(W,1,sum))
-  R <- M-W
-  e.dec <- eigen(R)
-  e.val <- e.dec$values
-  D.eigval = diag(e.val)
+plot(fit1$mn.beta, type='l', ylim=range(c(fit1$ci.beta)))
+lines(fit1$ci.beta[,1], lty=2)
+lines(fit1$ci.beta[,2], lty=2)
+abline(h=1, col='red')
 
-  # Generate data from the model specified in the spectral domain
-  beta.true = 1.1
-  sig2.true <- 0.1
-  sigma.x = 1
-  sigma.z = 1.5
-  sigma2.x = sigma.x^2
-  sigma2.z = sigma.z^2
-  lam.x <- lam.x.true <- 0.1;
-  lam.z <- lam.z.true <-  0.9
-  rho <- rho.true <- 0.7
-  alpha.true <- rho.true*(sigma.z/sigma.x)
-  tau.true <- sigma2.z*(1-rho.true^2)
-
-
-  # Function that computes matrix square root or its inverse
-  matrix.sqrt <- function(X, inv=FALSE){
-	  e.dec <- eigen(X, symmetric=TRUE)
-	  if(inv){
-		  out <- e.dec$vectors %*% diag(1/sqrt(e.dec$values)) %*% solve(e.dec$vectors)
-	  }
-	  if(!inv){
-		  out <- e.dec$vectors %*% diag(sqrt(e.dec$values)) %*% solve(e.dec$vectors)
-	  }
-	  out
-  }
-
-  R_zz <- solve((1-lam.z.true)*diag(n) + lam.z.true*D.eigval)
-  R_xx <- solve((1-lam.x.true)*diag(n) + lam.x.true*D.eigval)
-
-  Rzz.sqrt = matrix.sqrt((1-lam.z.true)*diag(n) + lam.z.true*D.eigval, inv=1)
-  Rxx.sqrt = matrix.sqrt((1-lam.x.true)*diag(n) + lam.x.true*D.eigval, inv=1)
-
-  R = rbind(cbind(sigma2.x*R_xx,
-                  rho*sqrt(sigma2.x*sigma2.z)*Rxx.sqrt%*%t(Rzz.sqrt)),
-            cbind(rho*sqrt(sigma2.x*sigma2.z)*Rzz.sqrt%*%t(Rxx.sqrt),
-                  sigma2.z*R_zz))
-
-  # generate data
-  set.seed(1)
-  xz = rmvnorm(1,mean=rep(0,2*n),sigma = R)
-  X.star = xz[1:n]
-  Z.star = xz[(n+1):(2*n)]
-  Y.star = beta.true * X.star + Z.star + rnorm(n, 0, sqrt(sig2.true))
-
-  # Fit the model (see help file for default prior values)
-  fit <- eCAR.Leroux(y=Y.star, x=X.star, W=W, verbose=FALSE, draws=100000, burn=50000, thin=50)
-
-  plot(fit$beta, type='l'); abline(h=beta.true, col='red')
-  plot(fit$c.beta, type='l'); abline(h=beta.true, col='red')
-  sapply(fit, summary)
+sapply(fit, summary)
 
 
 }
