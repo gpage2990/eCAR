@@ -71,7 +71,7 @@ par.eCAR.Leroux(y, x, W,
 
 \item{asigx}{prior shape parameter for sigma2.x, default is 1}
 
-\item{bsixg}{prior scale parameter for sigma2.x, default is 1}
+\item{bsigx}{prior scale parameter for sigma2.x, default is 1}
 
 \item{mb0}{prior mean parameter for beta0, default is 0}
 
@@ -124,6 +124,7 @@ A list containing arrays filled with MCMC iterates corresponding to model parame
 }
 
 \references{
+Will put something here.  Maybe arXiv submission?
 }
 \examples{
 
@@ -147,7 +148,7 @@ E <- lipcancer$data$expected
 
 set.seed(101)
 fit1 <- par.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL, model="Poisson",
-                         draws=25000, burn=5000, thin=1, verbose=FALSE,
+                         draws=10000, burn=5000, thin=1, verbose=FALSE,
                          joint_prior_lamx_lamz=FALSE, m=0, s2=4)
 
 
