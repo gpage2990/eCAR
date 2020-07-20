@@ -1,6 +1,10 @@
 \name{par.eCAR.Leroux}
 \alias{par.eCAR.Leroux}
 \title{R wrapper that accesses C code to fit parametric Leroux CAR spatial regression model that accounts for spatial confounding}
+\description{
+\code{par.eCAR.Leroux} is the main function used to fit the parametric Leroux CAR model specified in the spectral domain.
+}
+
 \usage{
 par.eCAR.Leroux(y, x, W,
                 E=NULL,
@@ -117,9 +121,6 @@ A list containing arrays filled with MCMC iterates corresponding to model parame
 \item{sig2z}{a T-dimensional array containing MCMC iterates associated with sigma2.z}
 
 \item{c.beta}{a T-dimensional array containing MCMC iterates associated with bias corrected beta}
-}
-\description{
-\code{parametric.eCAR.Leroux} is the main function used to fit the parametric Leroux CAR model specified in the spectral domain.
 }
 
 \references{

@@ -188,8 +188,6 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 		lamo = lamz_iter;
     lamn = rnorm(lamo, 0.1);
 
-//    Rprintf("lamo = %f\n", lamo);
-//    Rprintf("lamn = %f\n", lamn);
     if(lamn > 0 & lamn < 1){
 
       // Calcuate inverse sqrt matrix
@@ -216,17 +214,12 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
       }
 
 
-//      Rprintf("llo = %f\n", llo);
-//      Rprintf("lln = %f\n", lln);
-
       llr = lln - llo;
       uu = runif(0,1);
 
       if(llr > log(uu)) lamz_iter = lamn;
 
     }
-//    lamz_iter=0.3;
-//    Rprintf("lamz_iter = %f\n", lamz_iter);
 
 
 		//////////////////////////////////////////////////////////////////////////////////
@@ -272,8 +265,6 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
       if(llr > log(uu)) lamx_iter = lamn;
 
     }
-//    lamx_iter=0.1;
-//    Rprintf("lamx_iter = %f\n", lamx_iter);
 
 
 		//////////////////////////////////////////////////////////////////////////////////
@@ -307,8 +298,6 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
       if(llr > log(uu)) tau_iter = taun;
 
     }
-//    tau_iter = 1.1475;
-//    Rprintf("tau = %f\n", tau_iter);
 
 		//////////////////////////////////////////////////////////////////////////////////
 		//
@@ -341,8 +330,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
       if(llr > log(uu)) sig2_iter = s2n;
 
     }
-//    sig2_iter = 0.1;
-//    Rprintf("sig2 = %f\n", sig2_iter);
+
 		//////////////////////////////////////////////////////////////////////////////////
 		//
 		// updating sig2x
@@ -357,8 +345,6 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
     astar = 0.5*(*nobs) + asigx;
 		bstar = 0.5*ssq + bsigx;
 		sig2x_iter = 1/rgamma(astar, 1/bstar);
-
-//    Rprintf("sig2x = %f\n", sig2x_iter);
 
 
 		//////////////////////////////////////////
@@ -381,8 +367,6 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
         Sstar[j*2 + jj] = 0.0;
       }
     }
-
-//    RprintVecAsMat("Sstar", Sstar, 2, 2);
 
 
 		for(j = 0; j < *nobs; j++){
@@ -412,8 +396,6 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 
     Sstar[0] = Sstar[0] + 1/s2; Sstar[3] = Sstar[3] + 1/s2; // add prior
 
-//    RprintVecAsMat("Sstar", Sstar, 2, 2);
-
     // Get inverse of the 2 x 2 Sstar matrix
 		Det = (Sstar[0]*Sstar[3] - Sstar[1]*Sstar[2]);
 
@@ -423,20 +405,12 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 		SstarInv[3] = Sstar[0]/Det;
 
 
-//    RprintVecAsMat("SstarInv", SstarInv, 2, 2);
-
     Mstar[0] = SstarInv[0]*scr1[0] + SstarInv[1]*scr1[1];
     Mstar[1] = SstarInv[2]*scr1[0] + SstarInv[3]*scr1[1];
-
-//    RprintVecAsMat("Mstar", Mstar, 1, 2);
-
 
 		cholesky(SstarInv, (2) , &ld);
 
 		ran_mvnorm(Mstar, SstarInv, (2), scr1, outrmvnorm);
-
-
-//    RprintVecAsMat("outrmvnorm", outrmvnorm, 1, 2);
 
     beta_iter = outrmvnorm[0];
     alpha_iter = outrmvnorm[1];
@@ -480,13 +454,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 		  cholesky(Sstar, *ncov, &ld);
 		  inverse_from_cholesky(Sstar, scr1, scr2, *ncov); //Sstar is now an inverse;
 
-//	    RprintVecAsMat("Sstar", Sstar, *ncov, *ncov);
-
-
 		  matrix_product(Sstar, Mstar0, Mstar, *ncov, 1, *ncov);
-
-//      RprintVecAsMat("Mstar", Mstar, 1, *ncov);
-
 
 		  cholesky(Sstar, *ncov , &ld);
 
@@ -496,15 +464,12 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 		    eta_iter[b]=scr2[b];
 		  }
 
-//      RprintVecAsMat("eta_iter", eta_iter, 1, *ncov);
-
       for(j=0; j<*nobs; j++){
         Ce[j] = 0.0;
         for(b=0; b< *ncov; b++){
           Ce[j] = Ce[j] + Cstar[j*(*ncov) + b]*eta_iter[b];
         }
       }
-//      RprintVecAsMat("Ce", Ce, 1, *nobs);
     }
 
 

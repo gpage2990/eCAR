@@ -8,10 +8,6 @@
 */
 
 /* .C calls */
-extern void mcmcloop(void *, void *,void *,void *,void *,void *,void *,void *,void *,
-                     void *, void *,void *,void *,void *,void *,void *,void *,void *,
-                     void *, void *,void *);
-
 extern void mcmcloop_leroux_gauss(void *, void *,void *,void *,void *,void *,void *,void *,void *,
                                   void *, void *,void *,void *,void *,void *,void *,void *,void *,
                                   void *, void *, void *);
@@ -22,7 +18,6 @@ extern void mcmcloop_leroux_GLM(void *,void *,void *,void *,void *,void *,void *
 
 
 static const R_CMethodDef CEntries[] = {
-    {"mcmcloop", (DL_FUNC) &mcmcloop, 21},
     {"mcmcloop_leroux_gauss", (DL_FUNC) &mcmcloop_leroux_gauss, 21},
     {"mcmcloop_leroux_GLM", (DL_FUNC) &mcmcloop_leroux_GLM, 27},
     {NULL, NULL, 0}
