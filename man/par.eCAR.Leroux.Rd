@@ -157,7 +157,7 @@ lines(fit1$ci.beta[,1], lty=2)
 lines(fit1$ci.beta[,2], lty=2)
 abline(h=1, col='red')
 
-sapply(fit, summary)
+sapply(fit1, summary)
 
 
 }
