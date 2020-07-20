@@ -8,7 +8,7 @@ Authors@R: c(
 	person(given = "S. McKay", family = "Curtis", email = "s.mckay.curtis@gmail.com", role = c("ctb")),
 	person(given = "Radford M. Neal", family = "Neal", role = c("ctb")))
 Maintainer: Garritt L. Page <page@stat.byu.edu>
-Description: Fits Leroux model in spectral domain to estimate casaul spatial effect.  Semi-parametric model relies on INLA.  The INLA R-package can be downloaded at <http://www.r-inla.org>
+Description: Fits Leroux model in spectral domain to estimate casaul spatial effect.  Semi-parametric model relies on INLA.
 License: GPL
 Encoding: UTF-8
 Depends: R (>= 2.14.0)

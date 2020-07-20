@@ -2,7 +2,7 @@
 \alias{semipar.eCARglm.Leroux}
 \title{R wrapper that accesses INLA to fit semi-parametric Leroux CAR spatial regression model that accounts for spatial confounding.}
 \description{
-\code{semipar.eCAR.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.
+\code{semipar.eCAR.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.  This function calls INLA.
 }
 \usage{
 semipar.eCARglm.Leroux(y, x, W, E,
@@ -12,7 +12,7 @@ semipar.eCARglm.Leroux(y, x, W, E,
                        pcprior.sd=c(0.1,1),
                        s2=2,
                        eval.fineGrid=FALSE,
-                       verbose=TRUE)
+                       verbose=FALSE)
 }
 
 \arguments{
