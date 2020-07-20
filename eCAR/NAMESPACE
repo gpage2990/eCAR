@@ -1,0 +1,6 @@
+exportPattern("^[[:alpha:]]+")
+
+useDynLib(eCAR)
+
+export(par.eCAR.Leroux)
+export(semipar.eCARglm.Leroux)
