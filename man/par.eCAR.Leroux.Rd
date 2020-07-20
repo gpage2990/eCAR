@@ -83,7 +83,7 @@ par.eCAR.Leroux(y, x, W,
 \item{verbose}{If TRUE, then details associated with data being fit are printed to screen along with MCMC iterate counter}
 }
 \value{
-A list containing arrays filled with MCMC iterates corresponding to model parameters. Letting T = (draws - burn)/thin be the number of MCMC iterates requested, the output list contains the following
+A list containing arrays filled with MCMC iterates corresponding to model parameters. Letting T = (draws - burn)/thin be the number of MCMC iterates collecte, the output list contains the following
 
 \item{beta}{a T-dimensional array containing MCMC iterates associated with beta}
 
