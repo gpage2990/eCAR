@@ -1,3 +1,4 @@
+# has it worked???? hope so
 
 # Function to create the b-spline basis from Brian
 mybs <- function(x,L){
