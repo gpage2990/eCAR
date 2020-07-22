@@ -2,10 +2,11 @@
 \alias{semipar.eCARglm.Leroux}
 \title{R wrapper that accesses INLA to fit semi-parametric Leroux CAR spatial regression model that accounts for spatial confounding.}
 \description{
-\code{semipar.eCAR.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.  This function calls INLA.
+\code{semipar.eCARglm.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.  This function calls INLA.
 }
 \usage{
-semipar.eCARglm.Leroux(y, x, W, E,
+semipar.eCARglm.Leroux(y, x, W,
+                       E,
                        C=NA,
                        model="Poisson",
                        L=20,
@@ -35,15 +36,15 @@ semipar.eCARglm.Leroux(y, x, W, E,
 
 \item{model}{Specifies the likelihood or data model.  Options are "Gaussian", "Poisson", "Binomial", "Negative Binomial"}
 
-\item{L}{Number of basis.}
+\item{L}{Number of basis functions for the spline model on the (spatial scale)-varying beta. The smoothing method applied here is a Bayesian version of the P-spline approach by Eilers and Marx (1996), assuming a random walk on the spline coefficients and a PC-prior on the precision parameter of the random walk.}
 
-\item{pcprior.sd}{To finish}
+\item{pcprior.sd}{Vector of length 2 specifying the scaling parameters for the PC-priors assumed on the precision of the (spatial scale)-varying beta and the data y, respectively. Each of the scaling parameters can be interpreted as a guess on the marginal standard deviation (default are 0.1 and 1, as guess for the standard deviatoin of the varying beta and the data.}
 
-\item{s2}{To finish}
+\item{s2}{Only used for model="Negative Binomial"; it represents the standard deviation of the zero-mean Gaussian prior on the log of the dispersion parameter (default equal to 2).}
 
-\item{eval.fineGrid}{To finish}
+\item{eval.fineGrid}{logical; if TRUE the (spatial scale)-varying beta is computed over a fine grid on the eigenvalue domain.}
 
-\item{verbose}{To finish}
+\item{verbose}{lofical; if TRUE the inla verbose output is displayed during model fitting.}
 }
 \value{
 Need to describe the function's output
@@ -53,8 +54,28 @@ Need to describe the function's output
 \references{
 Will put something here if it is relevant.
 }
+
 \examples{
 
-# Need to put an example
+# Our R-package
+library(eCAR)
+
+data(lipcancer)
+W <- lipcancer$neighborhood.Matrix
+Y <- lipcancer$data$observed
+X <- lipcancer$data$pcaff
+E <- lipcancer$data$expected
+
+fit.lipcancer = semipar.eCARglm.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
+                                    pcprior.sd = c(0.1,1),
+                                    model="Poisson",
+                                    L=20,
+                                    eval.fineGrid = FALSE,
+                                    verbose=FALSE)
+
+plot(fit.lipcancer$omega, fit.lipcancer$beta.mn, type="l", ylim=c(0.85,1.3))
+lines(fit.lipcancer$omega, fit.lipcancer$beta.q025, lty=2)
+lines(fit.lipcancer$omega, fit.lipcancer$beta.q975, lty=2)
+abline(h=1, col='red')
 
 }

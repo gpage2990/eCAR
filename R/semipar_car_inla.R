@@ -33,10 +33,10 @@ rescale.row = function(A,vec){
 # y: data vector (possibly including NA) of length n
 # x: exposure data vector of length n
 # W: matrix n x n with 1 if i~j otherwise 0
-# X.conf: matrix with confounders, nrow(conf)=n
+# C: matrix with confounders, nrow(conf)=n
 
-# TODO: include random effects? doable using the inla formula extension...
-# recall this even if not rictly stneeded; conf = tapply(X.conf,rep(1:ncol(X.conf),each=nrow(X.conf)),function(i) i)
+# TO DO: include random effects? doable using the inla formula extension...
+# recall this even if not rictly stneeded; conf = tapply(C,rep(1:ncol(C),each=nrow(C)),function(i) i)
 
 semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
                                   L=20, pcprior.sd=c(0.1,1), s2=2,
@@ -51,7 +51,6 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
   Eigdec <- eigen(R)
   G <- Eigdec$vec
   v <- Eigdec$val
-  X.conf <- C
 
   # compute cubic b-spline basis
   # Eilers basis:
@@ -68,7 +67,7 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
     BXstar = sweep(B,1, xstar,"*")
 
     # semipar model fit (INLA) for Gaussian case
-    if (all(is.na(X.conf))) {
+    if (is.null(C)) {
       stk = inla.stack(data=list(y=ystar), A=list(
         matrix(1,n,1), #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1)  ?
         BXstar,
@@ -102,7 +101,7 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
         matrix(1,n,1), #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1)  ?
         BXstar,
         diag(n)),
-        effects=list(conf= cbind(rep(1,n), X.conf),
+        effects=list(conf= cbind(rep(1,n), C),
                      id.beta = 1:L,
                      id.z = 1:n))
       r = inla(y ~  -1 + conf +
@@ -134,7 +133,7 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
       Z.tilde[,i] =  rescale.row(G, B[,i]) %*% (t(G) %*% x)
     }
 
-    if (all(is.na(X.conf))) {
+    if (is.null(C)) {
       stk = inla.stack(
         data=list(y=y, E = E),
         A=list(1, Z.tilde, diag(n)),
@@ -157,7 +156,7 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
       stk = inla.stack(
         data=list(y=y, E = E),
         A=list(1, Z.tilde, diag(n)),
-        effects=list(conf= cbind(rep(1,n), X.conf),
+        effects=list(conf= cbind(rep(1,n), C),
                      id.beta=1:L,
                      id.z = 1:n))
       formula = y ~ -1 + conf +
