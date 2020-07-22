@@ -13,7 +13,7 @@ semipar.eCARglm.Leroux(y, x, W,
                        pcprior.sd=c(0.1,1),
                        s2=10,
                        eval.fineGrid=FALSE,
-                       verbose=FALSE)
+                       verbose=FALSE, ...)
 }
 
 \arguments{
@@ -45,10 +45,28 @@ semipar.eCARglm.Leroux(y, x, W,
 \item{eval.fineGrid}{logical; if TRUE the (spatial scale)-varying beta is computed over a grid of 1000 equally spaced locations on the eigenvalue domain.}
 
 \item{verbose}{logical; if TRUE the verbose output from INLA is printed.}
-}
+
+\item{...}{Arguments to be passed to the inla call; for instance control.inla=list(strategy="laplace")}}
+
+
 \value{
-Need to describe the function's output
-\item{stuff}{If the function outputs a list of that contains stuff, then you can list things here.}
+A list containing
+
+\item{omega}{vector containing eigenvalues (if eval.fineGrid is set to TRUE, omega is a 1000-dimensional vector otherwise is n-dimensional)}
+
+\item{beta.mn,beta.q025,beta.q975}{vectors containing,respectively, the posterior mean lower and upper quantiles of the (spatial scale)-varying beta at each omega value (for the non Gaussian cases it is the exponentiated beta).}
+
+\item{B.pred}{the B-spline prediction matrix, containing L B-spline basis functions evaluated at each omega value (if eval.fineGrid is TRUE, B-splines are evaluated on 1000 equally-spaced locations on the eigenvalue domain)}
+
+\item{postsample.beta}{matrix of dim Lx1000, containing drawns from the posterior distribution of the L spline coefficients}
+
+\item{postsample.prec.beta}{vector of length 1000, containing drawns from the posterior distribution of the precision of the random walk on the spline coefficients}
+
+\item{postsample.prec.z}{vector of length 1000, containing drawns from the posterior distribution of prec.z}
+
+\item{postsample.lambda.z}{vector of length 1000, containing drawns from the posterior distribution of lambda.z}
+
+\item{postsample.c.beta}{vector of length 1000, containing drawns from the posterior distribution of the bias corrected beta (i.e. beta evaluated at the largest eigenvalue)}
 }
 
 \references{
@@ -66,16 +84,11 @@ Y <- lipcancer$data$observed
 X <- lipcancer$data$pcaff
 E <- lipcancer$data$expected
 
-fit.lipcancer = semipar.eCARglm.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
+fit1 = semipar.eCARglm.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
                                     model="Poisson",
                                     L=20,
                                     eval.fineGrid = FALSE,
                                     verbose=FALSE)
-
-plot(fit.lipcancer$omega, fit.lipcancer$beta.mn, type="l", ylim=c(0.85,1.3))
-lines(fit.lipcancer$omega, fit.lipcancer$beta.q025, lty=2)
-lines(fit.lipcancer$omega, fit.lipcancer$beta.q975, lty=2)
-abline(h=1, col='red')
-
+plot.eCAR(fit1, exp.beta = TRUE, ylim=c(0.8,1.3))
 }

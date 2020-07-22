@@ -1,7 +1,7 @@
 # TO DO list:
-# - produce a list as output including the post.sample
-# - add 'standard=TRUE'; this will add the constant beta to the output
-
+# - produce a list as output including the post.sample;
+# - add 'standard=TRUE' ? may be helpful to provide also the constant beta in the output
+# - #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1) ? it should not matter
 
 # Function to create the b-spline basis from Brian
 mybs <- function(x,L){
@@ -69,7 +69,7 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
     # semipar model fit (INLA) for Gaussian case
     if (is.null(C)) {
       stk = inla.stack(data=list(y=ystar), A=list(
-        matrix(1,n,1), #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1)  ?
+        matrix(1,n,1), #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1) ? it should not matter
         BXstar,
         diag(n)),
         effects=list(intercept=1,
@@ -213,9 +213,15 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
   # sample from the posterior and compute posterior mean curve
   sample.tmp = inla.posterior.sample(1000,r)
   splinecoefs = matrix(nrow=L, ncol=1000)
+  prec.beta = matrix(nrow=1, ncol=1000)
+  prec.z = matrix(nrow=1, ncol=1000)
+  lambda.z = matrix(nrow=1, ncol=1000)
   ind.beta =  c(paste("id.beta:",1:L, sep=""))
   for(j in 1:1000){
     splinecoefs[,j] = (sample.tmp[[j]]$latent)[ind.beta,]
+    prec.beta[1,j] = sample.tmp[[j]]$hyperpar["Precision for id.beta"]
+    prec.z[1,j] = sample.tmp[[j]]$hyperpar["Precision for id.z"]
+    lambda.z[1,j] = sample.tmp[[j]]$hyperpar["Beta for id.z"]
   }
 
   # ARRANGE OUTPUT, MAKE THE TWO CASES: exp(beta_omega); beta_omega
@@ -233,10 +239,20 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
 
   # return results
   if (!eval.fineGrid) {
-    out = list(omega=v, beta.mn=beta.mn, beta.q025=beta.q025, beta.q975=beta.q975)
+    out = list(omega=v, beta.mn=beta.mn, beta.q025=beta.q025, beta.q975=beta.q975,
+               B.pred=B.pred,
+               postsample.beta=splinecoefs,
+               postsample.prec.beta=as.numeric(prec.beta),
+               postsample.prec.z=as.numeric(prec.z),
+               postsample.lambda.z=as.numeric(lambda.z))
   } else {
     out = list(omega=seq(min(v),max(v),length.out=1000),
-               beta.mn=beta.mn, beta.q025=beta.q025, beta.q975=beta.q975)
+               beta.mn=beta.mn, beta.q025=beta.q025, beta.q975=beta.q975,
+               B.pred=B.pred,
+               postsample.beta=splinecoefs,
+               postsample.prec.beta=as.numeric(prec.beta),
+               postsample.prec.z=as.numeric(prec.z),
+               postsample.lambda.z=as.numeric(lambda.z))
   }
   return(out)
 }
