@@ -1,4 +1,7 @@
-# has it worked???? hope so
+# TO DO list:
+# - produce a list as output including the post.sample  
+# - add 'standard=TRUE'; this will add the constant beta to the output
+
 
 # Function to create the b-spline basis from Brian
 mybs <- function(x,L){
@@ -32,15 +35,14 @@ rescale.row = function(A,vec){
 # W: matrix n x n with 1 if i~j otherwise 0
 # X.conf: matrix with confounders, nrow(conf)=n
 
-# TODO: include random effects
-# X.random: indicator matrix for possible iid random effect, nrow(conf)=n
-# recall this even if not needed; conf = tapply(X.conf,rep(1:ncol(X.conf),each=nrow(X.conf)),function(i) i)
+# TODO: include random effects? doable using the inla formula extension...
+# recall this even if not rictly stneeded; conf = tapply(X.conf,rep(1:ncol(X.conf),each=nrow(X.conf)),function(i) i)
 
 semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
-                               model="Poisson",
-                               L=20, pcprior.sd=c(0.1,1), s2=2,
-                               eval.fineGrid=FALSE,
-                               verbose=FALSE){
+                                  L=20, pcprior.sd=c(0.1,1), s2=2,
+                                  eval.fineGrid=FALSE,
+                                  model="Gaussian",
+                                  verbose=FALSE, ...){
   library(INLA)
   # compute spectral decomposition of the structure matrix 'R'
   n = length(y)
@@ -49,47 +51,115 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
   Eigdec <- eigen(R)
   G <- Eigdec$vec
   v <- Eigdec$val
-
   X.conf <- C
+
   # compute cubic b-spline basis
   # Eilers basis:
-  B = bspline(x=v, ndx=L-3, bdeg=3)  # Eilers basis
+  B <- bspline(x=v, ndx=L-3, bdeg=3)  # Eilers basis
   if (eval.fineGrid) B.pred = bspline(x=seq(min(v),max(v),length.out=1000), ndx=L-3, bdeg=3)  else B.pred=B
   # Brian basis:
-  #B = mybs(x=v, L=L)
-  #if (eval.fineGrid) B.pred = mybs(x=seq(min(v), max(v), length.out=1000), L=L) else B.pred=B
+  # B = mybs(x=v, L=L)
+  # if (eval.fineGrid) B.pred = mybs(x=seq(min(v), max(v), length.out=1000), L=L) else B.pred=B
 
-  Z.tilde = matrix(NA, nrow = n, ncol = L)
-  for(i in 1:L){
-    Z.tilde[,i] =  rescale.row(G, B[,i]) %*% (t(G) %*% x)
-  }
+  if (model=="Gaussian") {
 
-  if (all(is.na(X.conf))) {
-    stk = inla.stack(
-      data=list(y=y, E = E),
-      A=list(1, Z.tilde, diag(n)),
-      effects=list(intercept=rep(1,n),
-                   id.beta=1:L,
-                   id.z = 1:n))
-    formula = y ~ -1 + intercept +
-      f(id.beta,
-        model = "rw1",
-        constr=FALSE, scale.model = TRUE,
-        hyper = list(prec=list(
-          prior="pc.prec",
-          param=c(pcprior.sd[1]/0.31, 0.01)))) +
-      f(id.z, model = "generic1",
-        Cmatrix = Diagonal(x=1, n=n)-inla.as.sparse(R),
-        hyper = list(prec=list(
-          prior="pc.prec",
-          param=c(pcprior.sd[2]/0.31, 0.01))))
+    xstar <- as.vector(t(G)%*%x)
+    ystar <- as.vector(t(G)%*%y)
+    BXstar = sweep(B,1, xstar,"*")
+
+    # semipar model fit (INLA) for Gaussian case
+    if (all(is.na(X.conf))) {
+      stk = inla.stack(data=list(y=ystar), A=list(
+        matrix(1,n,1), #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1)  ?
+        BXstar,
+        diag(n)),
+        effects=list(intercept=1,
+                     id.beta = 1:L,
+                     id.z = 1:n))
+      r = inla(y ~  -1 + intercept +
+                 f(id.beta,
+                   # model="generic0",
+                   # Cmatrix=inla.scale.model(Q=INLA:::inla.rw1(L), constr = list(A = matrix(1, 1, L), e=0)),
+                   model = "rw1",
+                   scale.model = TRUE,
+                   constr=FALSE,
+                   hyper = list(prec=list(
+                     prior="pc.prec",
+                     param=c(pcprior.sd[1]/0.31, 0.01))))+
+                 f(id.z, model=
+                     inla.rgeneric.define(
+                       model=myrgeneric.eigenLEROUX,
+                       u.prec=pcprior.sd[2]/0.31,
+                       alpha.prec=0.01,
+                       v=v, n=n)),
+               data = inla.stack.data(stk),
+               control.family = list(hyper=list(prec=list(initial=12, fixed=TRUE))),
+               control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
+               control.compute = list(config=TRUE, dic=TRUE),
+               verbose=F)
+    } else{
+      stk = inla.stack(data=list(y=ystar), A=list(
+        matrix(1,n,1), #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1)  ?
+        BXstar,
+        diag(n)),
+        effects=list(conf= cbind(rep(1,n), X.conf),
+                     id.beta = 1:L,
+                     id.z = 1:n))
+      r = inla(y ~  -1 + conf +
+                 f(id.beta,
+                   model = "rw1",
+                   constr=FALSE,
+                   scale.model = TRUE,
+                   hyper = list(prec=list(
+                     prior="pc.prec",
+                     param=c(pcprior.sd[1]/0.31, 0.01))))+
+                 f(id.z, model=
+                     inla.rgeneric.define(
+                       model=myrgeneric.eigenLEROUX,
+                       u.prec=pcprior.sd[2]/0.31,
+                       alpha.prec=0.01,
+                       v=v, n=n)),
+               data = inla.stack.data(stk),
+               control.family = list(hyper=list(prec=list(initial=12, fixed=TRUE))),
+               control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
+               control.compute = list(config=TRUE, dic=TRUE),
+               verbose=F)
+    }
+
   } else {
+
+    # non Gaussian cases (Bin, Negbin, Poisson)
+    Z.tilde = matrix(NA, nrow = n, ncol = L)
+    for(i in 1:L){
+      Z.tilde[,i] =  rescale.row(G, B[,i]) %*% (t(G) %*% x)
+    }
+
+    if (all(is.na(X.conf))) {
       stk = inla.stack(
-      data=list(y=y, E = E),
-      A=list(1, Z.tilde, diag(n)),
-      effects=list(conf= cbind(rep(1,n), X.conf),
-                   id.beta=1:L,
-                   id.z = 1:n))
+        data=list(y=y, E = E),
+        A=list(1, Z.tilde, diag(n)),
+        effects=list(intercept=rep(1,n),
+                     id.beta=1:L,
+                     id.z = 1:n))
+      formula = y ~ -1 + intercept +
+        f(id.beta,
+          model = "rw1",
+          constr=FALSE, scale.model = TRUE,
+          hyper = list(prec=list(
+            prior="pc.prec",
+            param=c(pcprior.sd[1]/0.31, 0.01)))) +
+        f(id.z, model = "generic1",
+          Cmatrix = Diagonal(x=1, n=n)-inla.as.sparse(R),
+          hyper = list(prec=list(
+            prior="pc.prec",
+            param=c(pcprior.sd[2]/0.31, 0.01))))
+    } else {
+      stk = inla.stack(
+        data=list(y=y, E = E),
+        A=list(1, Z.tilde, diag(n)),
+        effects=list(conf= cbind(rep(1,n), X.conf),
+                     id.beta=1:L,
+                     id.z = 1:n))
       formula = y ~ -1 + conf +
         f(id.beta,
           model = "rw1",
@@ -102,41 +172,43 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
           hyper = list(prec=list(
             prior="pc.prec",
             param=c(pcprior.sd[2]/0.31, 0.01))))
-  }
+    }
 
-  #  likelihood Negative Binomial 'NegBin'
-  if (model=="Negative Binomial"){
-    r = inla(formula,
-            data = inla.stack.data(stk),
-            family='nbinomial', E=E,
-            control.family = list(
-              variant=0,
-              hyper=list(theta= list(
-                prior="normal", param=c(0,1/s2^2)))),
-            control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
-            control.compute = list(dic=TRUE, config=TRUE),
-            verbose=verbose)
-  }
+    #  likelihood Negative Binomial 'NegBin'
+    if (model=="NegBin"){
+      r = inla(formula,
+               data = inla.stack.data(stk),
+               family='nbinomial', E=E,
+               control.family = list(
+                 variant=0,
+                 hyper=list(theta= list(
+                   prior="normal", param=c(0,1/s2^2)))),
+               control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
+               control.compute = list(dic=TRUE, config=TRUE),
+               verbose=verbose)
+    }
 
 
-  #  likelihood Binomial 'Bin'
-  if (model=="Binomial"){
-    r = inla(formula,
-             data = inla.stack.data(stk),
-             family='binomial', Ntrials=E,
-             control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
-             control.compute = list(dic=TRUE, config=TRUE),
-             verbose=verbose)
-  }
+    #  likelihood Binomial 'Bin'
+    if (model=="Bin"){
+      r = inla(formula,
+               data = inla.stack.data(stk),
+               family='binomial', Ntrials=E,
+               control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
+               control.compute = list(dic=TRUE, config=TRUE),
+               verbose=verbose)
+    }
 
-  # likelihood 'Poisson'
-  if (model=="Poisson"){
-    r = inla(formula,
-             data = inla.stack.data(stk),
-             family='poisson', E=E,
-             control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
-             control.compute = list(dic=TRUE, config=TRUE),
-             verbose=verbose)
+    # likelihood 'Poisson'
+    if (model=="Poisson"){
+      r = inla(formula,
+               data = inla.stack.data(stk),
+               family='poisson', E=E,
+               control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
+               control.compute = list(dic=TRUE, config=TRUE),
+               verbose=verbose)
+    }
+
   }
 
   # sample from the posterior and compute posterior mean curve
@@ -146,9 +218,19 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
   for(j in 1:1000){
     splinecoefs[,j] = (sample.tmp[[j]]$latent)[ind.beta,]
   }
-  beta.mn = apply(exp(B.pred%*%splinecoefs),1,mean)
-  beta.q025 = apply(exp(B.pred%*%splinecoefs),1,quantile, 0.025)
-  beta.q975 = apply(exp(B.pred%*%splinecoefs),1,quantile, 0.975)
+
+  # ARRANGE OUTPUT, MAKE THE TWO CASES: exp(beta_omega); beta_omega
+  # default for non-Gaussian case: exp(beta_omega)
+
+  if (model=="Gaussian") {
+    beta.mn = apply(B.pred%*%splinecoefs,1,mean)
+    beta.q025 = apply(B.pred%*%splinecoefs,1,quantile, 0.025)
+    beta.q975 = apply(B.pred%*%splinecoefs,1,quantile, 0.975)
+  } else {
+    beta.mn = apply(exp(B.pred%*%splinecoefs),1,mean)
+    beta.q025 = apply(exp(B.pred%*%splinecoefs),1,quantile, 0.025)
+    beta.q975 = apply(exp(B.pred%*%splinecoefs),1,quantile, 0.975)
+  }
 
   # return results
   if (!eval.fineGrid) {
@@ -161,10 +243,53 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
 }
 
 
-
-
-### TODO:
-  # 1) add the Gaussian case in the same function 'semipar.eCAR.Leroux'
-  # 2) try to fit the covid data with the confounders...see if it works the stack and inla call
-        # SOLVE ISSUE ABOUT IND.LATENT.....
-
+## inla.rgenric.define model for the Gaussian case (eq 25, sec 4.3 overleaf paper)
+myrgeneric.eigenLEROUX = function (cmd = c("graph", "Q", "mu", "initial",
+                                           "log.norm.const", "log.prior", "quit"),
+                                   theta = NULL)
+{
+  interpret.theta = function() {
+    return(list(prec = exp(theta[1L]),
+                r = exp(theta[2L])/(1+exp(theta[2L])),
+                lam = exp(theta[3L])/(1+exp(theta[3L]))))
+  }
+  graph = function() {
+    return(Q())
+  }
+  Q = function() {
+    prec = interpret.theta()$prec
+    r = interpret.theta()$r
+    lam = interpret.theta()$lam
+    Q = inla.as.sparse(diag(( r/(prec*(1-lam+lam*v)) + (1-r)/prec )^(-1)))
+    return(Q)
+  }
+  mu = function() {
+    return(numeric(0))
+  }
+  log.norm.const = function() {
+    prec = interpret.theta()$prec
+    r = interpret.theta()$r
+    lam = interpret.theta()$lam
+    a = ( r/(prec*(1-lam+lam*v)) + (1-r)/prec )^(-1)
+    #return(sum(log(a)))
+    val = -0.5*n * log(2*pi) + 0.5*sum(log(a))
+    return(val)
+    #    return(numeric(0))
+  }
+  log.prior = function() {
+    prec = interpret.theta()$prec
+    val = inla.pc.dprec(prec,u.prec,alpha.prec,log=T) + theta[1L] +
+      theta[2L] - 2*log(exp(theta[2L]) + 1) +  # unif
+      theta[3L] - 2*log(exp(theta[3L]) + 1)    # unif
+    return(val)
+  }
+  initial = function() {
+    return(c(0,1,1))
+  }
+  quit = function() {
+    return(invisible())
+  }
+  if (is.null(theta)) theta = initial()
+  val = do.call(match.arg(cmd), args = list())
+  return(val)
+}
