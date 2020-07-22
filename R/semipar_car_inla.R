@@ -1,5 +1,5 @@
 # TO DO list:
-# - produce a list as output including the post.sample  
+# - produce a list as output including the post.sample
 # - add 'standard=TRUE'; this will add the constant beta to the output
 
 
@@ -174,8 +174,8 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
             param=c(pcprior.sd[2]/0.31, 0.01))))
     }
 
-    #  likelihood Negative Binomial 'NegBin'
-    if (model=="NegBin"){
+    #  likelihood Negative Binomial
+    if (model=="Negative Binomial"){
       r = inla(formula,
                data = inla.stack.data(stk),
                family='nbinomial', E=E,
@@ -189,8 +189,8 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
     }
 
 
-    #  likelihood Binomial 'Bin'
-    if (model=="Bin"){
+    #  likelihood Binomial
+    if (model=="Binomial"){
       r = inla(formula,
                data = inla.stack.data(stk),
                family='binomial', Ntrials=E,
