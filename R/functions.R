@@ -133,16 +133,16 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
     c.beta[t,] <- out$beta[t] + out$alpha[t]*sqrt((1-out$lamx[t]+out$lamx[t]*Dseq)/(1-out$lamz[t]+out$lamz[t]*Dseq))
   }
 
-  mn.b <- apply(exp(c.beta),2,function(x) mean(x))
-  ci.b <- apply(exp(c.beta),2,function(x) emp.hpd(x))
 
   if(model=="Gaussian"){
-    out$mn.beta <-  matrix(apply(c.beta,2,function(x) mean(x)),nrow=1000,byrow=TRUE)
-    out$ci.beta <-  matrix(apply(c.beta,2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)
+    out$beta.mn <-  matrix(apply(c.beta,2,function(x) mean(x)),nrow=1000,byrow=TRUE)
+    out$beta.q025 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[1,]
+    out$beta.q975 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[2,]
   }
   if(model!="Gaussian"){
-    out$mn.beta <-  matrix(apply(exp(c.beta),2,function(x) mean(x)),nrow=1000,byrow=TRUE)
-    out$ci.beta <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)
+    out$beta.mn <-  matrix(apply(exp(c.beta),2,function(x) mean(x)),nrow=1000,byrow=TRUE)
+    out$beta.q025 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[1,]
+    out$beta.q975 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[2,]
   }
   out
 }

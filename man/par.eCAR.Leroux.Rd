@@ -153,12 +153,9 @@ fit1 <- par.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL, model="Poisson",
 
 
 
-plot(fit1$mn.beta, type='l', ylim=range(c(fit1$ci.beta)))
-lines(fit1$ci.beta[,1], lty=2)
-lines(fit1$ci.beta[,2], lty=2)
+plot(fit1$beta.mn, type='l', ylim=range(c(fit1$beta.q025,fit1$beta.q975)))
+lines(fit1$$beta.q025, lty=2)
+lines(fit1$beta.q975, lty=2)
 abline(h=1, col='red')
-
-sapply(fit1, summary)
-
 
 }
