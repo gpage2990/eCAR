@@ -8,7 +8,7 @@
 semipar.eCARglm.Leroux(y, x, W,
                        E,
                        C=NA,
-                       model="Poisson",
+                       model="Gaussian",
                        L=20,
                        pcprior.sd=c(0.1,1),
                        s2=2,
@@ -38,13 +38,13 @@ semipar.eCARglm.Leroux(y, x, W,
 
 \item{L}{Number of basis functions for the spline model on the (spatial scale)-varying beta. The smoothing method applied here is a Bayesian version of the P-spline approach by Eilers and Marx (1996), assuming a random walk on the spline coefficients and a PC-prior on the precision parameter of the random walk.}
 
-\item{pcprior.sd}{Vector of length 2 specifying the scaling parameters for the PC-priors assumed on the precision of the (spatial scale)-varying beta and the data y, respectively. Each of the scaling parameters can be interpreted as a guess on the marginal standard deviation (default are 0.1 and 1, as guess for the standard deviatoin of the varying beta and the data.}
+\item{pcprior.sd}{Vector of length 2 specifying the scaling parameters for the PC-priors assumed on the precision of the (spatial scale)-varying beta and the data y, respectively. Each of the scaling parameters can be interpreted as a guess on the marginal standard deviation (default are 0.1 and 1).}
 
-\item{s2}{Only used for model="Negative Binomial"; it represents the standard deviation of the zero-mean Gaussian prior on the log of the dispersion parameter (default equal to 2).}
+\item{s2}{standard deviation of the zero-mean Gaussian prior on the log of the dispersion parameter (only used for model="Negative Binomial", default equal to 2).}
 
-\item{eval.fineGrid}{logical; if TRUE the (spatial scale)-varying beta is computed over a fine grid on the eigenvalue domain.}
+\item{eval.fineGrid}{logical; if TRUE the (spatial scale)-varying beta is computed over a grid of 1000 equally spaced locations on the eigenvalue domain.}
 
-\item{verbose}{lofical; if TRUE the inla verbose output is displayed during model fitting.}
+\item{verbose}{logical; if TRUE the verbose output from INLA is printed.}
 }
 \value{
 Need to describe the function's output
