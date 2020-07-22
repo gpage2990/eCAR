@@ -39,7 +39,7 @@ rescale.row = function(A,vec){
 # recall this even if not rictly stneeded; conf = tapply(C,rep(1:ncol(C),each=nrow(C)),function(i) i)
 
 semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
-                                  L=20, pcprior.sd=c(0.1,1), s2=2,
+                                  L=20, pcprior.sd=c(0.1,1), s2=10,
                                   eval.fineGrid=FALSE,
                                   model="Gaussian",
                                   verbose=FALSE, ...){
@@ -127,7 +127,7 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
 
   } else {
 
-    # non Gaussian cases (Bin, Negbin, Poisson)
+    # non Gaussian cases (Binomial, Negative Binomial, Poisson)
     Z.tilde = matrix(NA, nrow = n, ncol = L)
     for(i in 1:L){
       Z.tilde[,i] =  rescale.row(G, B[,i]) %*% (t(G) %*% x)
@@ -181,7 +181,7 @@ semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
                control.family = list(
                  variant=0,
                  hyper=list(theta= list(
-                   prior="normal", param=c(0,1/s2^2)))),
+                   prior="normal", param=c(0,1/s2)))),
                control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
                control.compute = list(dic=TRUE, config=TRUE),
                verbose=verbose)

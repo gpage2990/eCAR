@@ -11,7 +11,7 @@ semipar.eCARglm.Leroux(y, x, W,
                        model="Gaussian",
                        L=20,
                        pcprior.sd=c(0.1,1),
-                       s2=2,
+                       s2=10,
                        eval.fineGrid=FALSE,
                        verbose=FALSE)
 }
@@ -40,7 +40,7 @@ semipar.eCARglm.Leroux(y, x, W,
 
 \item{pcprior.sd}{Vector of length 2 specifying the scaling parameters for the PC-priors assumed on the precision of the (spatial scale)-varying beta and the data y, respectively. Each of the scaling parameters can be interpreted as a guess on the marginal standard deviation (default are 0.1 and 1).}
 
-\item{s2}{standard deviation of the zero-mean Gaussian prior on the log of the dispersion parameter (only used for model="Negative Binomial", default equal to 2).}
+\item{s2}{Prior variance for the log of the dispersion parameter (only used for model="Negative Binomial", default equal to 10).}
 
 \item{eval.fineGrid}{logical; if TRUE the (spatial scale)-varying beta is computed over a grid of 1000 equally spaced locations on the eigenvalue domain.}
 
