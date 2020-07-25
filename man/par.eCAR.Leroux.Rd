@@ -120,7 +120,6 @@ A list containing arrays filled with MCMC iterates corresponding to model parame
 
 \item{sig2z}{a T-dimensional array containing MCMC iterates associated with sigma2.z}
 
-\item{c.beta}{a T-dimensional array containing MCMC iterates associated with bias corrected beta}
 }
 
 \references{
@@ -153,9 +152,9 @@ fit1 <- par.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL, model="Poisson",
 
 
 
-plot(fit1$beta.mn, type='l', ylim=range(c(fit1$beta.q025,fit1$beta.q975)))
-lines(fit1$$beta.q025, lty=2)
-lines(fit1$beta.q975, lty=2)
+plot(fit1$omega,fit1$beta.mn, type='l', ylim=range(c(fit1$beta.q025,fit1$beta.q975)))
+lines(fit1$omega,fit1$beta.q025, lty=2)
+lines(fit1$omega,fit1$beta.q975, lty=2)
 abline(h=1, col='red')
 
 }

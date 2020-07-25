@@ -118,7 +118,6 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   if(model=="Gaussian") out$sig2 <- matrix(C.out$sig2.out, nrow=nout, byrow=TRUE)
   out$rho <- matrix((out$alpha*sqrt(out$sig2x))/sqrt(out$tau + out$alpha^2*out$sig2x), nrow=nout, byrow=TRUE)
   out$sig2z <- matrix(out$tau + out$alpha^2*out$sig2x, nrow=nout, byrow=TRUE)
-  out$c.beta <- matrix(out$beta + out$alpha*sqrt(out$lamx/out$lamz), nrow=nout, byrow=TRUE)
   if(model!="Gaussian"){
     out$theta <- matrix(C.out$theta.out, nrow=nout, byrow=TRUE)
     out$beta0 <- matrix(C.out$beta0.out, nrow=nout, byrow=TRUE)
@@ -136,14 +135,15 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
 
   if(model=="Gaussian"){
     out$beta.mn <-  matrix(apply(c.beta,2,function(x) mean(x)),nrow=1000,byrow=TRUE)
-    out$beta.q025 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[1,]
-    out$beta.q975 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[2,]
+    out$beta.q025 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x))[1,],nrow=1000,byrow=TRUE)
+    out$beta.q975 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x))[2,],nrow=1000,byrow=TRUE)
   }
   if(model!="Gaussian"){
     out$beta.mn <-  matrix(apply(exp(c.beta),2,function(x) mean(x)),nrow=1000,byrow=TRUE)
-    out$beta.q025 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[1,]
-    out$beta.q975 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x)),nrow=1000,byrow=TRUE)[2,]
+    out$beta.q025 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x))[1,],nrow=1000,byrow=TRUE)
+    out$beta.q975 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x))[2,],nrow=1000,byrow=TRUE)
   }
+  out$omega <- Dseq
   out
 }
 

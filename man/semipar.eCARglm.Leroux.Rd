@@ -15,7 +15,6 @@ semipar.eCARglm.Leroux(y, x, W,
                        eval.fineGrid=FALSE,
                        verbose=FALSE, ...)
 }
-
 \arguments{
 \item{y}{response vector}
 

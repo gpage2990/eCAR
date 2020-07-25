@@ -39,9 +39,9 @@ rescale.row = function(A,vec){
 # recall this even if not rictly stneeded; conf = tapply(C,rep(1:ncol(C),each=nrow(C)),function(i) i)
 
 semipar.eCARglm.Leroux = function(y, x, W, E, C=NA,
+                                  model="Gaussian",
                                   L=20, pcprior.sd=c(0.1,1), s2=10,
                                   eval.fineGrid=FALSE,
-                                  model="Gaussian",
                                   verbose=FALSE, ...){
   library(INLA)
   # compute spectral decomposition of the structure matrix 'R'

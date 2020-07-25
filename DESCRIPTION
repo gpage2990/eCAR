@@ -5,13 +5,13 @@ Version: 0.1.0
 Authors@R: c(
   person(given = "Garritt", family = "L. Page", email = "page@stat.byu.edu", role = c("aut", "cre")),
   person(given = "Massimo", family = "Ventrucci", email = "massimo.ventrucci@unibo.it", role = c("aut")),
-	person(given = "S. McKay", family = "Curtis", email = "s.mckay.curtis@gmail.com", role = c("ctb", "cph")),
-	person(given = "Radford M. Neal", family = "Neal", role = c("ctb", "cph")))
-Maintainer: Garritt L. Page <page@stat.byu.edu>, Massimo Ventrucci <massimo.ventrucci@unibo.it>
+	person(given = "S. McKay", family = "Curtis", email = "s.mckay.curtis@gmail.com", role = c("cph")),
+	person(given = "Radford", family = "M. Neal", role = c("cph")))
+Maintainer: Garritt L. Page <page@stat.byu.edu>
 Description: Fits Leroux model in spectral domain to estimate casaul spatial effect.  Semi-parametric model relies on INLA.
 License: GPL
 Encoding: UTF-8
-Depends: R (>= 2.14.0)
+Depends: R (>= 3.5.0)
 Suggests: INLA
 LazyData: true
 RoxygenNote: 7.1.0
