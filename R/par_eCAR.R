@@ -1,20 +1,6 @@
 
 
 
-# HPD calculator (see TeachingDemos)
-emp.hpd <- function(x, conf=0.95){
-  conf <- min(conf, 1-conf)
-  n <- length(x)
-  nn <- round( n*conf )
-	x <- sort(x)
-	xx <- x[ (n-nn+1):n ] - x[1:nn]
-	m <- min(xx)
-	nnn <- which(xx==m)[1]
-	return( c( x[ nnn ], x[ n-nn+nnn ] ) )
-}
-
-
-
 # Wrapper to fit the joint Leroux model
 par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
                     joint_prior_lamx_lamz = FALSE,
@@ -34,6 +20,20 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   # 2 - Poisson
   # 3 - Binomial
   # 4 - Negative Binomial (Poisson with overdispersion)
+
+
+  # HPD calculator (see TeachingDemos)
+  emp.hpd <- function(x, conf=0.95){
+    conf <- min(conf, 1-conf)
+    n <- length(x)
+    nn <- round( n*conf )
+    x <- sort(x)
+    xx <- x[ (n-nn+1):n ] - x[1:nn]
+    m <- min(xx)
+    nnn <- which(xx==m)[1]
+    return( c( x[ nnn ], x[ n-nn+nnn ] ) )
+  }
+
 
   cat("A", model, "model is being fit \n")
   out <- NULL
@@ -146,9 +146,3 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   out$omega <- Dseq
   out
 }
-
-#eCAR.Leroux(y=Y.star, x=X.star, W=W)
-
-
-# Function that fits the semiparametric model using INLA
-# eCAR.

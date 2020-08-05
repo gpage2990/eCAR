@@ -3,4 +3,4 @@ exportPattern("^[[:alpha:]]+")
 useDynLib(eCAR)
 
 export(par.eCAR.Leroux)
-export(semipar.eCARglm.Leroux)
+export(semipar.eCAR.Leroux)
