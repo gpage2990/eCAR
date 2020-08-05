@@ -1,11 +1,11 @@
-\name{semipar.eCARglm.Leroux}
-\alias{semipar.eCARglm.Leroux}
+\name{semipar.eCAR.Leroux}
+\alias{semipar.eCAR.Leroux}
 \title{R wrapper that accesses INLA to fit semi-parametric Leroux CAR spatial regression model that accounts for spatial confounding.}
 \description{
-\code{semipar.eCARglm.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.  This function calls INLA.
+\code{semipar.eCAR.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.  This function calls INLA.
 }
 \usage{
-semipar.eCARglm.Leroux(y, x, W,
+semipar.eCAR.Leroux(y, x, W,
                        E,
                        C=NA,
                        model="Gaussian",
@@ -83,7 +83,7 @@ Y <- lipcancer$data$observed
 X <- lipcancer$data$pcaff
 E <- lipcancer$data$expected
 
-fit1 = semipar.eCARglm.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
+fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
                                     model="Poisson",
                                     L=20,
