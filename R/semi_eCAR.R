@@ -12,15 +12,15 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
                                eval.fineGrid=FALSE,
                                verbose=FALSE, ...){
   if (!requireNamespace("INLA", quietly = TRUE)) {
-    stop("Package \"INLA\" needed for this function to work. To install it, please go to http://www.r-inla.org/download.",
+    stop("Package \"INLA\" is needed for this function to work. To install it, please go to http://www.r-inla.org/download.",
          call. = FALSE)
   }
   if (!requireNamespace("Matrix", quietly = TRUE)) {
-    stop("Package \"Matrix\" needed for this function to work. Please install it.",
+    stop("Package \"Matrix\" is needed for this function to work. Please install it.",
          call. = FALSE)
   }
   if (!requireNamespace("splines", quietly = TRUE)) {
-    stop("Package \"splines\" needed for this function to work. Please install it.",
+    stop("Package \"splines\" is needed for this function to work. Please install it.",
          call. = FALSE)
   }
 
@@ -278,22 +278,26 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
 
   # return results
   if (!eval.fineGrid) {
-    out <- list(omega=Eigdec$val,
-                beta.mn=beta.mn, beta.q025=beta.q025, beta.q975=beta.q975,
-                B.pred=B.pred,
-                postsample.beta=splinecoefs,
-                postsample.prec.beta=as.numeric(prec.beta),
-                postsample.prec.z=as.numeric(prec.z),
-                postsample.lambda.z=as.numeric(lambda.z))
+    out <- eCAR.out(data_model = model,
+                    beta_omega = cbind(beta.mn, beta.q025, beta.q975,Eigdec$val),
+                    posterior_draws = list(postsample.beta=splinecoefs,
+                                       postsample.prec.beta=as.numeric(prec.beta),
+                                       postsample.prec.z=as.numeric(prec.z),
+                                       postsample.lambda.z=as.numeric(lambda.z),
+                                       B.pred = B.pred))
   } else {
-    out <- list(omega=seq(min(Eigdec$val),max(Eigdec$val),length.out=1000),
-                beta.mn=beta.mn, beta.q025=beta.q025, beta.q975=beta.q975,
-                B.pred=B.pred,
-                postsample.beta=splinecoefs,
-                postsample.prec.beta=as.numeric(prec.beta),
-                postsample.prec.z=as.numeric(prec.z),
-                postsample.lambda.z=as.numeric(lambda.z))
+    out <- eCAR.out(data_model = model,
+                    beta_omega = cbind(beta.mn,
+                                   beta.q025,
+                                   beta.q975,
+                                   seq(min(Eigdec$val),max(Eigdec$val),length.out=1000)),
+                    posterior_draws = list(postsample.beta=splinecoefs,
+                                       postsample.prec.beta=as.numeric(prec.beta),
+                                       postsample.prec.z=as.numeric(prec.z),
+                                       postsample.lambda.z=as.numeric(lambda.z),
+                                       B.pred = B.pred))
   }
+
   return(out)
 }
 

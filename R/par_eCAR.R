@@ -125,6 +125,9 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   if(ncov>0) out$eta <- matrix(C.out$eta.out, nrow=nout, byrow=TRUE)
   if(model=="Negative Binomial") out$nb_r = matrix(C.out$r.out, nrow=nout, byrow=TRUE)
 
+
+
+
   # Produce beta as a function of eigen-value
   Dseq <- seq(min(evals), max(evals), length=1000)
   c.beta <- matrix(NA, nrow=nout, ncol=length(Dseq))
@@ -134,15 +137,19 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
 
 
   if(model=="Gaussian"){
-    out$beta.mn <-  matrix(apply(c.beta,2,function(x) mean(x)),nrow=1000,byrow=TRUE)
-    out$beta.q025 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x))[1,],nrow=1000,byrow=TRUE)
-    out$beta.q975 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x))[2,],nrow=1000,byrow=TRUE)
+    beta.mn <-  matrix(apply(c.beta,2,function(x) mean(x)),nrow=1000,byrow=TRUE)
+    beta.q025 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x))[1,],nrow=1000,byrow=TRUE)
+    beta.q975 <-  matrix(apply(c.beta,2,function(x) emp.hpd(x))[2,],nrow=1000,byrow=TRUE)
   }
   if(model!="Gaussian"){
-    out$beta.mn <-  matrix(apply(exp(c.beta),2,function(x) mean(x)),nrow=1000,byrow=TRUE)
-    out$beta.q025 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x))[1,],nrow=1000,byrow=TRUE)
-    out$beta.q975 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x))[2,],nrow=1000,byrow=TRUE)
+    beta.mn <-  matrix(apply(exp(c.beta),2,function(x) mean(x)),nrow=1000,byrow=TRUE)
+    beta.q025 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x))[1,],nrow=1000,byrow=TRUE)
+    beta.q975 <-  matrix(apply(exp(c.beta),2,function(x) emp.hpd(x))[2,],nrow=1000,byrow=TRUE)
   }
-  out$omega <- Dseq
-  out
+  omega <- Dseq
+  result <- eCAR.out(data_model = model,
+                  beta_omega = cbind(beta.mn, beta.q025, beta.q975, omega),
+                  posterior_draws = out)
+
+  return(result)
 }

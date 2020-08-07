@@ -49,9 +49,9 @@ par.eCAR.Leroux(y, x, W,
 \item{joint_prior_lamx_lamz}{Logical.  If TRUE, then a uniform prior on space such that lamz > lamx.  If FALSE, independent beta priors are used.  }
 
 
-\item{m}{prior mean for (beta, alpha), where alpha = rho(sigz/sigx).  default is 0.}
+\item{m}{prior mean for (beta, gamma), where gamma = rho*(sigz/sigx).  default is 0.}
 
-\item{s2}{prior variance for (beta, alpha),where alpha = rho(sigz/sigx). default is 10}
+\item{s2}{prior variance for (beta, gamma),where gamma = rho*(sigz/sigx). default is 10}
 
 \item{alamx}{prior shape1 parameter for lam.x, default is 1. Only used if joint_prior_lamx_lamz = FALSE}
 
@@ -65,9 +65,9 @@ par.eCAR.Leroux(y, x, W,
 
 \item{bsig}{prior scale parameter for sigma2, default is 1}
 
-\item{atau}{prior shape parameter for tau, where tau = sigma2.z(1-rho^2). default is 1}
+\item{atau}{prior shape parameter for tau, where tau = sigma2.z*(1-rho^2). default is 1}
 
-\item{btau}{prior scale parameter for tau, where tau = sigma2.z(1-rho^2).  default is 1}
+\item{btau}{prior scale parameter for tau, where tau = sigma2.z*(1-rho^2).  default is 1}
 
 \item{asigx}{prior shape parameter for sigma2.x, default is 1}
 
@@ -93,33 +93,19 @@ par.eCAR.Leroux(y, x, W,
 
 \item{burn}{number of MCMC iterates discared as burn-in. default is 5000}
 
-\item{thin}{number by which the MCMC chain is thinne. default is 5}
+\item{thin}{number by which the MCMC chain is thinned. default is 5}
 
 \item{verbose}{If TRUE, then details associated with data being fit are printed to screen along with MCMC iterate counter}
 }
 
 
 \value{
-A list containing arrays filled with MCMC iterates corresponding to model parameters. Letting T = (draws - burn)/thin be the number of MCMC iterates collecte, the output list contains the following
-
-\item{beta}{a T-dimensional array containing MCMC iterates associated with beta}
-
-\item{alpha}{a T-dimensional array containing MCMC iterates associated with alpha}
-
-\item{tau}{a T-dimensional array containing MCMC iterates associated with tau}
-
-\item{sig2x}{a T-dimensional array containing MCMC iterates associated with sigma2.x}
-
-\item{lamx}{a T-dimensional array containing MCMC iterates associated with lambda.x}
-
-\item{lamz}{a T-dimensional array containing MCMC iterates associated with lambda.z}
-
-\item{sig2}{a T-dimensional array containing MCMC iterates associated with sigma2}
-
-\item{rho}{a T-dimensional array containing MCMC iterates associated with rho}
-
-\item{sig2z}{a T-dimensional array containing MCMC iterates associated with sigma2.z}
-
+The function returns an \code{eCAR} object which is a list that contains the following
+\enumerate{
+  \item {data_model: Character indicating which model was fit}
+	\item {beta_omega: Matrix comprised of four coulums.  The first contains the estimated scale varying estimate of beta, the second and third contain the 2.5\% and 97.5\% credible band, and the fourth a sequence of values corresponding to eigen-values}
+	\item {posterior_draws: a list containing posterior draws for all parameters in the model}
+ }
 }
 
 \references{
@@ -151,10 +137,5 @@ fit1 <- par.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL, model="Poisson",
                          joint_prior_lamx_lamz=FALSE, m=0, s2=4)
 
 
-
-plot(fit1$omega,fit1$beta.mn, type='l', ylim=range(c(fit1$beta.q025,fit1$beta.q975)))
-lines(fit1$omega,fit1$beta.q025, lty=2)
-lines(fit1$omega,fit1$beta.q975, lty=2)
-abline(h=1, col='red')
-
+plot(fit1)
 }

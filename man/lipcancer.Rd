@@ -5,7 +5,7 @@
 \alias{lipcancer}
 \title{Number of recorded lip cancer cases in the 56 districts of Scotland.}
 \format{
-data: A data frame with 56 rows and 6 variables:
+data: A data frame with 56 rows and the following 6 variables:
 \describe{
   \item{observed}{observed number of cancer cases}
   \item{expected}{the expected number of lip cancer cases computed using indirect standardisation based on Scotland-wide disease rates}

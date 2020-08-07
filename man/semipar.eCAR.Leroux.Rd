@@ -49,23 +49,22 @@ semipar.eCAR.Leroux(y, x, W,
 
 
 \value{
-A list containing
+A eCAR object which is a list containing the following
+\item{data_model}{Character indicating which model was fit}
 
-\item{omega}{vector containing eigenvalues (if eval.fineGrid is set to TRUE, omega is a 1000-dimensional vector otherwise is n-dimensional)}
+\item{beta_omega}{Matrix that contains respectively, the posterior mean lower and upper quantiles of the (spatial scale)-varying beta at each omega value (for the non Gaussian cases it is the exponentiated beta).}
 
-\item{beta.mn,beta.q025,beta.q975}{vectors containing,respectively, the posterior mean lower and upper quantiles of the (spatial scale)-varying beta at each omega value (for the non Gaussian cases it is the exponentiated beta).}
+\item{posterior_draws}{List containing posterior draws of the following parameters
 
-\item{B.pred}{the B-spline prediction matrix, containing L B-spline basis functions evaluated at each omega value (if eval.fineGrid is TRUE, B-splines are evaluated on 1000 equally-spaced locations on the eigenvalue domain)}
+\enumerate{
+\item{postsample.beta: matrix of dim Lx1000, containing drawns from the posterior distribution of the L spline coefficients}
+\item{postsample.prec.beta: vector of length 1000, containing drawns from the posterior distribution of the precision of the random walk on the spline coefficients}
+\item{postsample.prec.z: vector of length 1000, containing drawns from the posterior distribution of prec.z}
+\item{postsample.lambda.z: vector of length 1000, containing drawns from the posterior distribution of lambda.z}
+\item{postsample.c.beta: vector of length 1000, containing drawns from the posterior distribution of the bias corrected beta (i.e. beta evaluated at the largest eigenvalue)}
+}
+}
 
-\item{postsample.beta}{matrix of dim Lx1000, containing drawns from the posterior distribution of the L spline coefficients}
-
-\item{postsample.prec.beta}{vector of length 1000, containing drawns from the posterior distribution of the precision of the random walk on the spline coefficients}
-
-\item{postsample.prec.z}{vector of length 1000, containing drawns from the posterior distribution of prec.z}
-
-\item{postsample.lambda.z}{vector of length 1000, containing drawns from the posterior distribution of lambda.z}
-
-\item{postsample.c.beta}{vector of length 1000, containing drawns from the posterior distribution of the bias corrected beta (i.e. beta evaluated at the largest eigenvalue)}
 }
 
 \references{
@@ -83,11 +82,13 @@ Y <- lipcancer$data$observed
 X <- lipcancer$data$pcaff
 E <- lipcancer$data$expected
 
+\donttest{
 fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
                                     model="Poisson",
                                     L=20,
                                     eval.fineGrid = FALSE,
                                     verbose=FALSE)
-plot.eCAR(fit1, exp.beta = TRUE, ylim=c(0.8,1.3))
+plot(fit1)
+}
 }

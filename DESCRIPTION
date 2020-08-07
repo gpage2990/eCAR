@@ -13,6 +13,7 @@ License: GPL
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
 Suggests: INLA
+Imports: Matrix
 LazyData: true
 RoxygenNote: 7.1.0
 Additional_repositories: https://inla.r-inla-download.org/R/stable/

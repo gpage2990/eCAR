@@ -1,6 +1,7 @@
-exportPattern("^[[:alpha:]]+")
-
 useDynLib(eCAR)
+
 
 export(par.eCAR.Leroux)
 export(semipar.eCAR.Leroux)
+
+S3method(plot, eCAR)
