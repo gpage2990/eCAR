@@ -301,9 +301,5 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
   return(out)
 }
 
-# TO DO list:
-# - produce a list as output including the post.sample;
-# - add 'standard=TRUE' ? may be helpful to provide also the constant beta in the output
-# - #CHECK THIS!!!! Do I need to do matrix(apply(G,2,sum),n,1) ? it should not matter
 
 
