@@ -12,11 +12,13 @@
 eCAR.out <- function(
   data_model = NULL,
   beta_omega = NULL,
-  posterior_draws = NULL
+  posterior_draws = NULL,
+  DIC = NULL
 ){
   value <- list(data_model = data_model,
                 beta_omega = beta_omega,
-                posterior_draws = posterior_draws)
+                posterior_draws = posterior_draws,
+                DIC=DIC)
   attr(value, "class") <- "eCAR"
   value
 }

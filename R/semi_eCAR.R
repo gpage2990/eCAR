@@ -30,7 +30,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
   R <- diag(M)-W
   Eigdec <- eigen(R)
   G <- Eigdec$vec
-
+  omega <- Eigdec$val
 
   # first, 3 utilities functions:
   # bsplines, rescale.row, myrgeneric.eigenLEROUX
@@ -68,7 +68,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
       prec <- interpret.theta()$prec
       r <- interpret.theta()$r
       lam <- interpret.theta()$lam
-      Q <- INLA::inla.as.sparse(diag((r/(prec*(1 - lam + lam*Eigdec$val)) + (1-r)/prec )^(-1)))
+      Q <- INLA::inla.as.sparse(diag((r/(prec*(1 - lam + lam*omega)) + (1-r)/prec )^(-1)))
       return(Q)
     }
     mu <- function() {
@@ -78,7 +78,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
       prec <- interpret.theta()$prec
       r <- interpret.theta()$r
       lam <- interpret.theta()$lam
-      a <- (r/(prec*(1 - lam + lam*Eigdec$val)) + (1 - r) / prec)^(-1)
+      a <- (r/(prec*(1 - lam + lam*omega)) + (1 - r) / prec)^(-1)
       val <- -0.5*n * log(2*pi) + 0.5*sum(log(a))
       return(val)
     }
@@ -102,9 +102,9 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
 
 
   # compute cubic b-spline basis (Eilers basis):
-  B <- bspline(x=Eigdec$val, ndx=L-3, bdeg=3)
+  B <- bspline(x=omega, ndx=L-3, bdeg=3)
   if (eval.fineGrid) {
-    B.pred <- bspline(x=seq(min(Eigdec$val),max(Eigdec$val),length.out=1000), ndx=L-3, bdeg=3)
+    B.pred <- bspline(x=seq(min(omega),max(omega),length.out=1000), ndx=L-3, bdeg=3)
   } else {
     B.pred<-B
   }
@@ -131,8 +131,10 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
                    hyper = list(prec=list(
                      prior="pc.prec",
                      param=c(pcprior.sd[1]/0.31, 0.01))))+
-                 f(id.z, model=INLA::inla.rgeneric.define(
-                   model=eigenLEROUX)),
+                 f(id.z, model=INLA::inla.rgeneric.define(model=eigenLEROUX,
+                                                          omega=Eigdec$val,
+                                                          pcprior.sd=pcprior.sd,
+                                                          n=n)),
                data = INLA::inla.stack.data(stk),
                control.family = list(hyper=list(prec=list(initial=12, fixed=TRUE))),
                control.predictor = list(A = INLA::inla.stack.A(stk), compute=TRUE),
@@ -154,8 +156,10 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
                    hyper = list(prec=list(
                      prior="pc.prec",
                      param=c(pcprior.sd[1]/0.31, 0.01))))+
-                   f(id.z, model=INLA::inla.rgeneric.define(
-                     model=eigenLEROUX)),
+                   f(id.z, model=INLA::inla.rgeneric.define(model=eigenLEROUX,
+                                                            omega=Eigdec$val,
+                                                            pcprior.sd=pcprior.sd,
+                                                            n=n)),
                  data = INLA::inla.stack.data(stk),
                  control.family = list(hyper=list(prec=list(initial=12, fixed=TRUE))),
                  control.predictor = list(A = INLA::inla.stack.A(stk), compute=TRUE),
@@ -250,12 +254,13 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
   }
 
   # sample from the posterior and compute posterior mean curve
+  L.supported = sum(colSums(B) != 0)
   sample.tmp <- INLA::inla.posterior.sample(1000,r)
-  splinecoefs <- matrix(nrow=L, ncol=1000)
+  splinecoefs <- matrix(nrow=L.supported, ncol=1000)
   prec.beta <- matrix(nrow=1, ncol=1000)
   prec.z <- matrix(nrow=1, ncol=1000)
   lambda.z <- matrix(nrow=1, ncol=1000)
-  ind.beta <- c(paste("id.beta:",1:L, sep=""))
+  ind.beta <- c(paste("id.beta:",1:L.supported, sep=""))
   for(j in 1:1000){
     splinecoefs[,j] <- (sample.tmp[[j]]$latent)[ind.beta,]
     prec.beta[1,j] <- sample.tmp[[j]]$hyperpar["Precision for id.beta"]
@@ -267,35 +272,40 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
   # default for non-Gaussian case: exp(beta_omega)
 
   if (model=="Gaussian") {
-    beta.mn <- apply(B.pred%*%splinecoefs, 1, base::mean)
-    beta.q025 <- apply(B.pred%*%splinecoefs, 1, stats::quantile, 0.025)
-    beta.q975 <- apply(B.pred%*%splinecoefs, 1, stats::quantile, 0.975)
+    beta.mn <- apply(B.pred[,which(colSums(B) != 0)]%*%splinecoefs, 1, base::mean)
+    beta.q025 <- apply(B.pred[,which(colSums(B) != 0)]%*%splinecoefs, 1, stats::quantile, 0.025)
+    beta.q975 <- apply(B.pred[,which(colSums(B) != 0)]%*%splinecoefs, 1, stats::quantile, 0.975)
   } else {
-    beta.mn <- apply(exp(B.pred%*%splinecoefs), 1, base::mean)
-    beta.q025 <- apply(exp(B.pred%*%splinecoefs), 1, stats::quantile, 0.025)
-    beta.q975 <- apply(exp(B.pred%*%splinecoefs), 1, stats::quantile, 0.975)
+    beta.mn <- apply(exp(B.pred[,which(colSums(B) != 0)]%*%splinecoefs), 1, base::mean)
+    beta.q025 <- apply(exp(B.pred[,which(colSums(B) != 0)]%*%splinecoefs), 1, stats::quantile, 0.025)
+    beta.q975 <- apply(exp(B.pred[,which(colSums(B) != 0)]%*%splinecoefs), 1, stats::quantile, 0.975)
   }
 
   # return results
   if (!eval.fineGrid) {
     out <- eCAR.out(data_model = model,
-                    beta_omega = cbind(beta.mn, beta.q025, beta.q975,Eigdec$val),
+                    beta_omega = data.frame(beta.mn = beta.mn,
+                                      beta.q025 = beta.q025,
+                                      beta.q975 = beta.q975,
+                                      omega = omega),
                     posterior_draws = list(postsample.beta=splinecoefs,
                                        postsample.prec.beta=as.numeric(prec.beta),
                                        postsample.prec.z=as.numeric(prec.z),
                                        postsample.lambda.z=as.numeric(lambda.z),
-                                       B.pred = B.pred))
+                                       B.pred = B.pred),
+                    DIC=r$dic$dic)
   } else {
     out <- eCAR.out(data_model = model,
-                    beta_omega = cbind(beta.mn,
-                                   beta.q025,
-                                   beta.q975,
-                                   seq(min(Eigdec$val),max(Eigdec$val),length.out=1000)),
+                    beta_omega = data.frame(beta.mn = beta.mn,
+                                   beta.q025 = beta.q025,
+                                   beta.q975 = beta.q975,
+                                   omega = seq(min(omega),max(omega),length.out=1000)),
                     posterior_draws = list(postsample.beta=splinecoefs,
                                        postsample.prec.beta=as.numeric(prec.beta),
                                        postsample.prec.z=as.numeric(prec.z),
                                        postsample.lambda.z=as.numeric(lambda.z),
-                                       B.pred = B.pred))
+                                       B.pred = B.pred),
+                    DIC=r$dic$dic)
   }
 
   return(out)
