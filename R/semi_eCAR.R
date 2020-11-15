@@ -6,7 +6,7 @@
 # TO DO: include random effects? doable using the inla formula extension...
 # recall this even if not strictly needed; conf = tapply(C,rep(1:ncol(C),each=nrow(C)),function(i) i)
 
-semipar.eCAR.Leroux <- function(y, x, W, E, C=NA,
+semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL,
                                model="Gaussian",
                                L=20, pcprior.sd=c(0.1,1), s2=10,
                                eval.fineGrid=FALSE,
