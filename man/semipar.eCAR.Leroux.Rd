@@ -12,7 +12,7 @@ semipar.eCAR.Leroux(y, x, W,
                        L=20,
                        pcprior.sd=c(0.1,1),
                        s2=10,
-                       eval.fineGrid=FALSE,
+                       method = "spectral",
                        verbose=FALSE, ...)
 }
 \arguments{
@@ -41,7 +41,7 @@ semipar.eCAR.Leroux(y, x, W,
 
 \item{s2}{Prior variance for the log of the dispersion parameter (only used for model="Negative Binomial", default equal to 10).}
 
-\item{eval.fineGrid}{logical; if TRUE the (spatial scale)-varying beta is computed over a grid of 1000 equally spaced locations on the eigenvalue domain.}
+\item{method}{a character defining the type of adjustment; either "spectral" (default choice) which implements the model assuming (spatial scale)-varying beta, or "naive" which implements  the standard method with constant beta and no adjustment.}
 
 \item{verbose}{logical; if TRUE the verbose output from INLA is printed.}
 

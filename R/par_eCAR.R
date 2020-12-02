@@ -149,7 +149,9 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   omega <- Dseq
   result <- eCAR.out(data_model = model,
                   beta_omega = cbind(beta.mn, beta.q025, beta.q975, omega),
-                  posterior_draws = out)
+                  posterior_draws = out,
+                  DIC=NULL,
+                  regrcoef = NULL)
 
   return(result)
 }
