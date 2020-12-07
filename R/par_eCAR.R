@@ -4,6 +4,7 @@
 # Wrapper to fit the joint Leroux model
 par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
                     joint_prior_lamx_lamz = FALSE,
+                    lamx.fix.val = NULL, sig2x.fix.val = NULL,
                     m=0,s2=10,alamx=1,blamx=1,alamz=1,blamz=1,
                     asig=1,bsig=1,atau=1,btau=1,asigx=1,bsigx=1,
                     mb0=0,s2b0=100,me=0,s2e=100,mx=0, s2x=100,
@@ -61,13 +62,24 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
     Cstar <- t(evecs) %*% as.matrix(C)
   }
 
+  updateXparms <- TRUE
+  if(is.null(lamx.fix.val) | is.null(sig2x.fix.val)){
+    updateXparms <- FALSE
+    sig2x.fix.val <- 1
+    lamx.fix.val <- 0.5
+  }
+
 
   modelPriors = c(m, s2, alamx, blamx, alamz, blamz, asig, bsig,
                   atau, btau, asigx, bsigx, mb0, s2b0, me, s2e, mx, s2x)
   MHsd <- c(tau_cand_sd, sig2_cand_sd)
-  beta0 <- beta <- alpha <- tau <- sig2x <- lamx <- lamz <- sig2 <- rep(1, nout)
+  beta0 <- beta <- alpha <- tau <- sig2 <- rep(1, nout)
+  sig2x <- rep(sig2x.fix.val,nout)
+  lamx <- lamz <- rep(lamx.fix.val, nout)
   theta <- nb_r <- matrix(0, nrow=nout, ncol=nobs)
   eta <- matrix(0, nrow=nout, ncol=ncov)
+
+
   if(model=="Gaussian"){
     # I first center the X and the Y to set the intercept to zero
     ystar <- ystar - mean(ystar)
@@ -79,6 +91,7 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
                 as.double(evals), as.double(t(Cstar)), as.integer(ncov),
                 as.double(modelPriors), as.double(MHsd),
                 as.integer(verbose), as.integer(joint_prior_lamx_lamz),
+                as.integer(updateXparms),
                 beta.out=as.double(beta), alpha.out=as.double(alpha),
                 tau.out=as.double(tau), sig2x.out=as.double(sig2x),
                 lamx.out=as.double(lamx), lamz.out=as.double(lamz),
@@ -99,6 +112,7 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
                 as.integer(modelnum), as.double(modelPriors),
                 as.double(MHsd), as.integer(verbose),
                 as.integer(joint_prior_lamx_lamz),
+                as.integer(updateXparms),
                 beta.out=as.double(beta), alpha.out=as.double(alpha),
                 tau.out=as.double(tau), sig2x.out=as.double(sig2x),
                 lamx.out=as.double(lamx), lamz.out=as.double(lamz),

@@ -11,6 +11,8 @@ par.eCAR.Leroux(y, x, W,
                 C=NULL,
                 model="Gaussian",
                 joint_prior_lamx_lamz = FALSE,
+                lamx.fix.val = NULL,
+                sig2x.fix.val = NULL,
                 m=0, s2=10,
                 alamx=1, blamx=1,
                 alamz=1, blamz=1,
@@ -48,6 +50,10 @@ par.eCAR.Leroux(y, x, W,
 
 \item{joint_prior_lamx_lamz}{Logical.  If TRUE, then a uniform prior on space such that lamz > lamx.  If FALSE, independent beta priors are used.  }
 
+
+\item{lamx.fix.val}{If a value is supplied then lambda_x is not updated in the MCMC algorithm, but rather treated as the fixed known supplied value}
+
+\item{sig2x.fix.val}{If a value is supplied then sigma2_x is not updated in the MCMC algorithm, but rather treated as the fixed known supplied value}
 
 \item{m}{prior mean for (beta, gamma), where gamma = rho*(sigz/sigx).  default is 0.}
 
