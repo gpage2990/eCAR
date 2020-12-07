@@ -62,9 +62,9 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
     Cstar <- t(evecs) %*% as.matrix(C)
   }
 
-  updateXparms <- TRUE
+  updateXparms <- FALSE
   if(is.null(lamx.fix.val) | is.null(sig2x.fix.val)){
-    updateXparms <- FALSE
+    updateXparms <- TRUE
     sig2x.fix.val <- 1
     lamx.fix.val <- 0.5
   }
