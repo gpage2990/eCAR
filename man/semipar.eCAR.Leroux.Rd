@@ -7,9 +7,10 @@
 \usage{
 semipar.eCAR.Leroux(y, x, W,
                        E,
-                       C=NA,
+                       C=NULL,
+                       names.covariates=NULL,
                        model="Gaussian",
-                       L=20,
+                       L=10,
                        pcprior.sd=c(0.1,1),
                        s2=10,
                        method = "spectral",
@@ -33,6 +34,8 @@ semipar.eCAR.Leroux(y, x, W,
 
 \item{C}{design matrix for the covariates that are included as controls}
 
+\item{names.covariates}{Specifies the names of the covariates inside C}
+
 \item{model}{Specifies the likelihood or data model.  Options are "Gaussian", "Poisson", "Binomial", "Negative Binomial"}
 
 \item{L}{Number of basis functions for the spline model on the (spatial scale)-varying beta. The smoothing method applied here is a Bayesian version of the P-spline approach by Eilers and Marx (1996), assuming a random walk on the spline coefficients and a PC-prior on the precision parameter of the random walk.}
@@ -41,7 +44,7 @@ semipar.eCAR.Leroux(y, x, W,
 
 \item{s2}{Prior variance for the log of the dispersion parameter (only used for model="Negative Binomial", default equal to 10).}
 
-\item{method}{a character defining the type of adjustment; either "spectral" (default choice) which implements the model assuming (spatial scale)-varying beta, or "naive" which implements  the standard method with constant beta and no adjustment.}
+\item{method}{a character defining the type of adjustment; either "spectral" (default choice) which implements the model assuming (spatial scale)-varying beta, or "naive" which implements the standard method with constant beta hence no spectral adjustment.}
 
 \item{verbose}{logical; if TRUE the verbose output from INLA is printed.}
 
@@ -65,6 +68,10 @@ A eCAR object which is a list containing the following
 }
 }
 
+\item{DIC}{Deviance information criterion computed by INLA}
+
+\item{regrcoef}{posterior summaries (mean, sd, 0.025quant, 0.975quant) for the regression coefs associated to the covariates inside 'C' (if model is Binomial, Poisson or Negative binomial, the posterior summaries refere to the exponentiated coef)}
+
 }
 
 \references{
@@ -86,8 +93,7 @@ E <- lipcancer$data$expected
 fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
                                     model="Poisson",
-                                    L=20,
-                                    eval.fineGrid = FALSE,
+                                    L=10,
                                     verbose=FALSE)
 plot(fit1)
 }

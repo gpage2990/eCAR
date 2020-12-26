@@ -8,7 +8,7 @@
 
 semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
                                 model="Gaussian",
-                                L=20, pcprior.sd=c(0.1,1), s2=10,
+                                L=10, pcprior.sd=c(0.1,1), s2=10,
                                 method = "spectral",
                                 verbose=FALSE, ...){
   if (!requireNamespace("INLA", quietly = TRUE)) {
@@ -106,14 +106,14 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
     if (is.null(C)) {
       X.cov <- data.frame(intercept=rep(1,n))
       form.cov <- paste(" -1 + ", " intercept ")
-      form1 <- as.formula(paste("y", form.cov, sep=" ~" ))
+      form1 <- stats::as.formula(paste("y", form.cov, sep=" ~" ))
       # NOTE: if we want to pass a formula as an input we need to do work here in 'form1'
     } else {
       X.cov <- data.frame(intercept=1, C)
       colnames(X.cov) <- c("intercept", paste("cov",1:ncol(C), sep = ""))
       if (!is.null(names.covariates) & length(names.covariates)==ncol(C)) colnames(X.cov) <- c("intercept", names.covariates)
       form.cov <- paste(" -1 + ", paste(colnames(X.cov), collapse = " + "))
-      form1 <- as.formula(paste("y", form.cov, sep=" ~" ))
+      form1 <- stats::as.formula(paste("y", form.cov, sep=" ~" ))
       # NOTE: if we want to pass a formula as an input we need to do work here in 'form1'
     }
 
@@ -153,7 +153,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
           omega=Eigdec$val,
           pcprior.sd=pcprior.sd,
           n=n))
-      res <- INLA::inla(update.formula(form1,form2),
+      res <- INLA::inla(stats::update.formula(form1,form2),
                 data = INLA::inla.stack.data(stk),
                 control.family = list(hyper=list(prec=list(initial=12, fixed=TRUE))),
                 control.predictor = list(A = INLA::inla.stack.A(stk), compute=TRUE),
@@ -192,7 +192,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
 
       #  likelihood Negative Binomial
       if (model=="Negative Binomial"){
-        res <- INLA::inla(update.formula(form1,form2),
+        res <- INLA::inla(stats::update.formula(form1,form2),
                   data = INLA::inla.stack.data(stk),
                   family='nbinomial', E=E,
                   control.family = list(
@@ -207,7 +207,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
 
       #  likelihood Binomial
       if (model=="Binomial"){
-        res <- INLA::inla(update.formula(form1,form2),
+        res <- INLA::inla(stats::update.formula(form1,form2),
                   data = INLA::inla.stack.data(stk),
                   family='binomial', Ntrials=E,
                   control.predictor = list(A = INLA::inla.stack.A(stk),
@@ -218,7 +218,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
 
       # likelihood 'Poisson'
       if (model=="Poisson"){
-        res <- INLA::inla(update.formula(form1,form2),
+        res <- INLA::inla(stats::update.formula(form1,form2),
                   data = INLA::inla.stack.data(stk),
                   family='poisson', E=E,
                   control.predictor = list(A = INLA::inla.stack.A(stk),
@@ -302,7 +302,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
     if (is.null(C)) {
       X.cov <- data.frame(intercept=1, x=x)
       form.cov <- paste(" -1 + ", " intercept + ", " x ")
-      form1 <- as.formula(paste("y", form.cov, sep=" ~" ))
+      form1 <- stats::as.formula(paste("y", form.cov, sep=" ~" ))
       # NOTE: if we want to pass a formula as an input we need to do add it here in 'form1'
     } else {
       X.cov <- data.frame(intercept=1, x=x)
@@ -310,7 +310,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
       colnames(X.cov) <- c("intercept", "x", paste("cov",1:ncol(C), sep = ""))
       if (!is.null(names.covariates) & length(names.covariates)==ncol(C)) colnames(X.cov) <- c("intercept", "x", names.covariates)
       form.cov <- paste(" -1 + ", paste(colnames(X.cov), collapse = " + "))
-      form1 <- as.formula(paste("y", form.cov, sep=" ~" ))
+      form1 <- stats::as.formula(paste("y", form.cov, sep=" ~" ))
       # NOTE: if we want to pass a formula as an input we need to add it here in 'form1'
     }
 
@@ -327,10 +327,10 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
                             prior="pc.prec",
                             param=c(pcprior.sd[2]/0.31, 0.01))))
 
-      res <- INLA::inla(update.formula(form1, form2),
-                        data = inla.stack.data(stk),
+      res <- INLA::inla(stats::update.formula(form1, form2),
+                        data = INLA::inla.stack.data(stk),
                         control.family = list(hyper=list(prec=list(initial=12, fixed=TRUE))),
-                        control.predictor = list(A = inla.stack.A(stk), compute=TRUE),
+                        control.predictor = list(A = INLA::inla.stack.A(stk), compute=TRUE),
                         control.compute = list(dic=TRUE, config=TRUE),
                         verbose=TRUE, ...)
     } else {
@@ -348,7 +348,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
 
 
       if (model=="Poisson"){
-        res <- INLA::inla(update.formula(form1,form2),
+        res <- INLA::inla(stats::update.formula(form1,form2),
                           data = INLA::inla.stack.data(stk),
                           family='poisson', E=E,
                           control.predictor = list(A = INLA::inla.stack.A(stk), compute=TRUE),
@@ -356,7 +356,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
                           verbose=verbose, ...)
       }
       if (model=="Binomial"){
-        res <- INLA::inla(update.formula(form1,form2),
+        res <- INLA::inla(stats::update.formula(form1,form2),
                           data = INLA::inla.stack.data(stk),
                           family='binomial', Ntrials=E,
                           control.predictor = list(A = INLA::inla.stack.A(stk), compute=TRUE),
@@ -364,7 +364,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
                           verbose=verbose, ...)
       }
       if (model=="Negative Binomial"){
-        res <- INLA::inla(update.formula(form1, form2),
+        res <- INLA::inla(stats::update.formula(form1, form2),
                           data = INLA::inla.stack.data(stk),
                           family='nbinomial', E=E,
                           control.family = list(variant=0,
