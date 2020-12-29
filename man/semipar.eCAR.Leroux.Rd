@@ -75,7 +75,7 @@ A eCAR object which is a list containing the following
 }
 
 \references{
-Will put something here if it is relevant.
+Guan, Y; Page, G.L.; Reich, B.J.; Ventrucci, M.; Yang, S; "A spectral adjustment for spatial confounding" <arXiv:2012.11767>
 }
 
 \examples{

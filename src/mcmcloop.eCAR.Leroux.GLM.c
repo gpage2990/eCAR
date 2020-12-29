@@ -262,6 +262,7 @@ void mcmcloop_leroux_GLM(int *draws, int *burn, int *thin, int *nobs, double *y,
 			bstar = 0.5*ssq + bsigx;
 			sig2x_iter = 1/rgamma(astar, 1/bstar);
 		}
+    
 
 		ssq = quform(mnvec, Sigma_invz, *nobs);
 

@@ -115,7 +115,7 @@ The function returns an \code{eCAR} object which is a list that contains the fol
 }
 
 \references{
-Will put something here.  Maybe arXiv submission?
+Guan, Y; Page, G.L.; Reich, B.J.; Ventrucci, M.; Yang, S; "A spectral adjustment for spatial confounding" <arXiv:2012.11767>
 }
 \examples{
 
