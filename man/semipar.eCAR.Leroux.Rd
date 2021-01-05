@@ -70,7 +70,7 @@ A eCAR object which is a list containing the following
 
 \item{DIC}{Deviance information criterion computed by INLA}
 
-\item{regrcoef}{posterior summaries (mean, sd, 0.025quant, 0.975quant) for the regression coefs associated to the covariates inside 'C' (if model is Binomial, Poisson or Negative binomial, the posterior summaries refere to the exponentiated coef)}
+\item{regrcoef}{posterior summaries (mean, sd, 0.025quant, 0.975quant) for the regression coefs associated to the covariates inside 'C' (if model is Binomial, Poisson or Negative binomial, the posterior summaries refer to the exponentiated coef)}
 
 }
 
@@ -89,7 +89,12 @@ Y <- lipcancer$data$observed
 X <- lipcancer$data$pcaff
 E <- lipcancer$data$expected
 
+library(parallel)
+options(mc.cores = 1)
+
 \donttest{
+
+
 fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
                                     model="Poisson",

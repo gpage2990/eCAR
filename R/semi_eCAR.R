@@ -121,6 +121,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
     B <- bspline(x=omega, ndx=L-3, bdeg=3)
     B.pred <- bspline(x=seq(min(omega),max(omega),length.out=1000), ndx=L-3, bdeg=3)
 
+
     ### Gaussian case ###
     if (model=="Gaussian") {
       # xstar <- as.vector(t(G)%*%x)

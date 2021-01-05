@@ -4,11 +4,13 @@
 \alias{eCAR.out}
 \title{eCAR class constructor}
 \usage{
-eCAR.out(data_model = NULL,
-beta_omega = NULL,
-posterior_draws = NULL,
-DIC=NULL,
-regrcoef=NULL)
+eCAR.out(
+  data_model = NULL,
+  beta_omega = NULL,
+  posterior_draws = NULL,
+  DIC = NULL,
+  regrcoef = NULL
+)
 }
 \arguments{
 \item{data_model}{a characther indicating what data model was fit;}
@@ -17,9 +19,9 @@ regrcoef=NULL)
 
 \item{posterior_draws}{a list containing the posterior draws of all model parameters;}
 
-\item{DIC}{Deviance information criterion; currently, this is available only for semipar.eCAR.Leroux();}
+\item{DIC}{Deviance information criterion;}
 
-\item{regrcoef}{posterior summaries (mean, sd, 0.025quant, 0.975quant) for the regression coefs associated to the covariates inside 'C' (if model is Binomial, Poisson or Negative binomial, the posterior summaries refere to the exponentiated coef); currently, this is available only for semipar.eCAR.Leroux().}
+\item{regrcoef}{posterior summaries (mean, sd, 0.025quant, 0.975quant) for the regression coefs;}
 }
 \description{
 A constructor for the \code{eCAR} class. The class \code{eCAR} is a named list containing

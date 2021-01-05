@@ -124,14 +124,14 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
 
 
   out$beta <- matrix(C.out$beta.out, nrow=nout, byrow=TRUE)
-  out$alpha <- matrix(C.out$alpha.out, nrow=nout, byrow=TRUE)
+  out$gamma <- matrix(C.out$alpha.out, nrow=nout, byrow=TRUE)
   out$tau <- matrix(C.out$tau.out, nrow=nout, byrow=TRUE)
   out$sig2x <- matrix(C.out$sig2x.out, nrow=nout, byrow=TRUE)
   out$lamx <- matrix(C.out$lamx.out, nrow=nout, byrow=TRUE)
   out$lamz <- matrix(C.out$lamz.out, nrow=nout, byrow=TRUE)
   if(model=="Gaussian") out$sig2 <- matrix(C.out$sig2.out, nrow=nout, byrow=TRUE)
-  out$rho <- matrix((out$alpha*sqrt(out$sig2x))/sqrt(out$tau + out$alpha^2*out$sig2x), nrow=nout, byrow=TRUE)
-  out$sig2z <- matrix(out$tau + out$alpha^2*out$sig2x, nrow=nout, byrow=TRUE)
+  out$rho <- matrix((out$gamma*sqrt(out$sig2x))/sqrt(out$tau + out$gamma^2*out$sig2x), nrow=nout, byrow=TRUE)
+  out$sig2z <- matrix(out$tau + out$gamma^2*out$sig2x, nrow=nout, byrow=TRUE)
   if(model!="Gaussian"){
     out$theta <- matrix(C.out$theta.out, nrow=nout, byrow=TRUE)
     out$beta0 <- matrix(C.out$beta0.out, nrow=nout, byrow=TRUE)
@@ -146,7 +146,7 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
   Dseq <- seq(min(evals), max(evals), length=1000)
   c.beta <- matrix(NA, nrow=nout, ncol=length(Dseq))
   for(t in 1:nout){
-    c.beta[t,] <- out$beta[t] + out$alpha[t]*sqrt((1-out$lamx[t]+out$lamx[t]*Dseq)/(1-out$lamz[t]+out$lamz[t]*Dseq))
+    c.beta[t,] <- out$beta[t] + out$gamma[t]*sqrt((1-out$lamx[t]+out$lamx[t]*Dseq)/(1-out$lamz[t]+out$lamz[t]*Dseq))
   }
 
 

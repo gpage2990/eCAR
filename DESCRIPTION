@@ -15,6 +15,6 @@ Depends: R (>= 3.5.0)
 Suggests: INLA
 Imports: Matrix
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Additional_repositories: https://inla.r-inla-download.org/R/stable/
 URL: https://github.com/gpage2990/eCAR
