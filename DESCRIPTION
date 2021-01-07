@@ -1,6 +1,6 @@
 Package: eCAR
 Type: Package
-Title: Eigen-Value CAR Models
+Title: Eigenvalue CAR Models
 Version: 0.1.0
 Authors@R: c(
   person(given = "Garritt", family = "L. Page", email = "page@stat.byu.edu", role = c("aut", "cre")),
@@ -8,7 +8,7 @@ Authors@R: c(
 	person(given = "S. McKay", family = "Curtis", email = "s.mckay.curtis@gmail.com", role = c("cph")),
 	person(given = "Radford", family = "M. Neal", role = c("cph")))
 Maintainer: Garritt L. Page <page@stat.byu.edu>
-Description: Fits Leroux model in spectral domain to estimate casaul spatial effect.  Semi-parametric model relies on INLA.
+Description: Fits Leroux model in spectral domain to estimate causal spatial effect.  The semi-parametric model relies on INLA.
 License: GPL
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
