@@ -189,7 +189,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 		lamo = lamz_iter;
     	lamn = rnorm(lamo, 0.1);
 
-    	if(lamn > 0 & lamn < 1){
+    	if((lamn > 0) & (lamn < 1)){
 
       		// Calcuate inverse sqrt matrix
       		llo = 0.0; lln = 0.0;
@@ -231,7 +231,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 		if(*updateXparms){
     		lamo = lamx_iter;
     		lamn = rnorm(lamo, 0.1);
-    		if(lamn > 0 & lamn < 1){
+    		if((lamn > 0) & (lamn < 1)){
 
       			llo = 0.0; lln = 0.0;
       			for(j=0; j<*nobs; j++){
@@ -265,7 +265,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
       			uu = runif(0,1);
 
       			if(llr > log(uu)) lamx_iter = lamn;
-    		}	
+    		}
 		}
 
 		//////////////////////////////////////////////////////////////////////////////////

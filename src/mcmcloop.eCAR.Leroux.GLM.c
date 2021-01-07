@@ -107,7 +107,7 @@ void mcmcloop_leroux_GLM(int *draws, int *burn, int *thin, int *nobs, double *y,
 	//
 	// ===================================================================================
 
-	double sig2x_iter=sig2x[0], lamx_iter=lamx[0]; 
+	double sig2x_iter=sig2x[0], lamx_iter=lamx[0];
 	double beta_iter=0.5, alpha_iter=0.5752237, beta0_iter=0.0;
   	double lamz_iter=0.96, tau_iter=0.4375;
 	double *theta_iter = R_VectorInit(*nobs, 0.0);
@@ -262,7 +262,7 @@ void mcmcloop_leroux_GLM(int *draws, int *burn, int *thin, int *nobs, double *y,
 			bstar = 0.5*ssq + bsigx;
 			sig2x_iter = 1/rgamma(astar, 1/bstar);
 		}
-    
+
 
 		ssq = quform(mnvec, Sigma_invz, *nobs);
 
@@ -281,7 +281,7 @@ void mcmcloop_leroux_GLM(int *draws, int *burn, int *thin, int *nobs, double *y,
 		lamo = lamz_iter;
     	lamn = rnorm(lamo, 0.05);
 
-		if(lamn > 0 & lamn < 1){
+		if((lamn > 0) & (lamn < 1)){
 
       		ldetn=0.0; ldeto=0.0;
 			for(j=0; j<*nobs; j++){
@@ -347,7 +347,7 @@ void mcmcloop_leroux_GLM(int *draws, int *burn, int *thin, int *nobs, double *y,
     		lamo = lamx_iter;
     		lamn = rnorm(lamo, 0.05);
 
-    		if(lamn > 0 & lamn < 1){
+    		if((lamn > 0) & (lamn < 1)){
 
       			ldetn=0.0; ldeto=0.0;
 		  		for(j=0; j<*nobs; j++){
@@ -626,7 +626,7 @@ void mcmcloop_leroux_GLM(int *draws, int *burn, int *thin, int *nobs, double *y,
 
 		    	Mstar0[b] = Mstar0[b] + me*(1/s2e);
 
-		  	}	
+		  	}
 
 		  	cholesky(Sstar, *ncov, &ld);
 		  	inverse_from_cholesky(Sstar, scr1, scr2, *ncov); //Sstar is now an inverse;
