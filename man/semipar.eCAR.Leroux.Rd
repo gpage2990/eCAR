@@ -89,9 +89,6 @@ Y <- lipcancer$data$observed
 X <- lipcancer$data$pcaff
 E <- lipcancer$data$expected
 
-library(parallel)
-options(mc.cores = 1)
-
 \donttest{
 
 
