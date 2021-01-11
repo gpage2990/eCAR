@@ -1,8 +1,8 @@
 \name{semipar.eCAR.Leroux}
 \alias{semipar.eCAR.Leroux}
-\title{R wrapper that accesses INLA to fit semi-parametric Leroux CAR spatial regression model that accounts for spatial confounding.}
+\title{R wrapper that accesses 'INLA' to fit semi-parametric Leroux CAR spatial regression model that accounts for spatial confounding.}
 \description{
-\code{semipar.eCAR.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.  This function calls INLA.
+\code{semipar.eCAR.Leroux} is the main function used to fit the semi-parametric Leroux CAR model specified in the spectral domain.  This function calls 'INLA'.
 }
 \usage{
 semipar.eCAR.Leroux(y, x, W,
@@ -46,9 +46,9 @@ semipar.eCAR.Leroux(y, x, W,
 
 \item{method}{a character defining the type of adjustment; either "spectral" (default choice) which implements the model assuming (spatial scale)-varying beta, or "naive" which implements the standard method with constant beta hence no spectral adjustment.}
 
-\item{verbose}{logical; if TRUE the verbose output from INLA is printed.}
+\item{verbose}{logical; if TRUE the verbose output from the "inla" call is printed.}
 
-\item{...}{Arguments to be passed to the inla call; for instance control.inla=list(strategy="laplace")}}
+\item{...}{Arguments to be passed to the "inla" call; for instance control.inla=list(strategy="laplace")}}
 
 
 \value{
@@ -68,7 +68,7 @@ A eCAR object which is a list containing the following
 }
 }
 
-\item{DIC}{Deviance information criterion computed by INLA}
+\item{DIC}{Deviance information criterion computed by 'INLA'}
 
 \item{regrcoef}{posterior summaries (mean, sd, 0.025quant, 0.975quant) for the regression coefs associated to the covariates inside 'C' (if model is Binomial, Poisson or Negative binomial, the posterior summaries refer to the exponentiated coef)}
 
