@@ -8,8 +8,10 @@ Authors@R: c(
 	person(given = "S. McKay", family = "Curtis", email = "s.mckay.curtis@gmail.com", role = c("cph")),
 	person(given = "Radford", family = "M. Neal", role = c("cph")))
 Maintainer: Garritt L. Page <page@stat.byu.edu>
-Description: Fits Leroux model in spectral domain to estimate causal spatial effect as detailed in Guan, Y; Page, G.L.; Reich, B.J.; Ventrucci, M.; Yang, S; (2020) <arXiv:2012.11767>.  Both the parametric and semi-parametric models are available.  The semi-parametric model relies on 'INLA'.  The 'INLA' package can be obtained from 
-  <https://www.r-inla.org/>.
+Description: Fits Leroux model in spectral domain to estimate causal spatial effect as detailed in 
+             Guan, Y; Page, G.L.; Reich, B.J.; Ventrucci, M.; Yang, S; (2020) <arXiv:2012.11767>.  
+             Both the parametric and semi-parametric models are available.  The semi-parametric model 
+             relies on 'INLA'.  The 'INLA' package can be obtained from <https://www.r-inla.org/>.
 License: GPL
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
