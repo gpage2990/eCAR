@@ -82,6 +82,7 @@ Guan, Y; Page, G.L.; Reich, B.J.; Ventrucci, M.; Yang, S; "A spectral adjustment
 
 # Our R-package
 library(eCAR)
+library(INLA)
 inla.setOption(num.threads = '1:1')
 
 data(lipcancer)
