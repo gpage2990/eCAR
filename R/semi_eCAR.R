@@ -6,10 +6,12 @@
 # TO DO: include random effects? doable using the inla formula extension...
 # recall this even if not strictly needed; conf = tapply(C,rep(1:ncol(C),each=nrow(C)),function(i) i)
 
-semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
+semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL,
+                                names.covariates=NULL,
                                 model="Gaussian",
                                 L=10, pcprior.sd=c(0.1,1), s2=10,
                                 method = "spectral",
+                                num.threads.inla = NULL,
                                 verbose=FALSE, ...){
   if (!requireNamespace("INLA", quietly = TRUE)) {
     stop("Package \"INLA\" is needed for this function to work. To install it, please go to http://www.r-inla.org/download.",
@@ -23,6 +25,7 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL, names.covariates=NULL,
     stop("Package \"splines\" is needed for this function to work. Please install it.",
          call. = FALSE)
   }
+  if (!is.null(num.threads.inla)) INLA::inla.setOption(num.threads = num.threads.inla)
 
   n <- length(y)
   M <- rowSums(W)

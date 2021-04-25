@@ -82,8 +82,8 @@ Guan, Y; Page, G.L.; Reich, B.J.; Ventrucci, M.; Yang, S; "A spectral adjustment
 
 # Our R-package
 library(eCAR)
-library(INLA)
-inla.setOption(num.threads = '1:1')
+#library(INLA)
+#inla.setOption(num.threads = '1:1')
 
 data(lipcancer)
 W <- lipcancer$neighborhood.Matrix
@@ -98,6 +98,7 @@ fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
                                     model="Poisson",
                                     L=10,
+                                    num.threads.inla = '1:1',
                                     verbose=FALSE)
 plot(fit1)
 }
