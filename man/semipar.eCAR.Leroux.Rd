@@ -94,13 +94,14 @@ E <- lipcancer$data$expected
 
 \donttest{
 
-
-fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
+if (!requireNamespace("INLA", quietly = TRUE)) {
+  fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
                                     model="Poisson",
                                     L=10,
                                     num.threads.inla = '1:1',
                                     verbose=FALSE)
-plot(fit1)
+  plot(fit1)
+}
 }
 }
