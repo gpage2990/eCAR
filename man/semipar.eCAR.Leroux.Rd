@@ -93,7 +93,7 @@ X <- lipcancer$data$pcaff
 E <- lipcancer$data$expected
 
 \donttest{
-
+# only run example if INLA is installed.
 if (requireNamespace("INLA", quietly = TRUE)) {
   fit1 = semipar.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL,
                                     pcprior.sd = c(0.1,1),
