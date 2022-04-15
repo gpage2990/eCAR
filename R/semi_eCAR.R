@@ -1,4 +1,252 @@
-# E: offset (e.g. for covid data E=scale(pop,center=F))
+
+# TO DO : let the user select the type of resolution varying coef model
+# rvc.model = c('pspline', 'rw2'); where rw2 applies the method by lindgren
+# I guess rw2 must be less comp expansive than pspline
+# cause we do not need to create the bspline basis and the stack goes away
+
+semipar.eCAR <- function(y, x, W, E, C=NULL,
+                         names.covariates=NULL,
+                         model="Gaussian",
+                         eCAR.model="besag", # or "bym"
+                         L=10,
+                         rw.ord="rw1",  # or "rw2"
+                         pcprior.sd=c(0.1,1), s2=10,
+                         method = "spectral",
+                         num.threads.inla = 1,
+                         verbose=FALSE, ...){
+
+  if (!requireNamespace("INLA", quietly = TRUE)) {
+    stop("Package \"INLA\" is needed for this function to work. To install it, please go to http://www.r-inla.org/download.",
+         call. = FALSE)
+  }
+  if (!requireNamespace("Matrix", quietly = TRUE)) {
+    stop("Package \"Matrix\" is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  if (!requireNamespace("splines", quietly = TRUE)) {
+    stop("Package \"splines\" is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  if (!is.null(num.threads.inla)) INLA::inla.setOption(num.threads = num.threads.inla)
+
+  n <- length(y)
+  M <- rowSums(W)
+  R <- diag(M)-W
+
+  # compute spectral decomposition of the structure matrix 'R' (we do it also for the 'naive')
+  Eigdec <- eigen(R)
+  G <- Eigdec$vec
+  omega <- Eigdec$val
+
+  if (method=="spectral"){
+
+    # create the b-spline basis (P-spline method, Eilers 1996)
+    bspline <- function(x, xl=min(x), xr=max(x), ndx, bdeg) {
+      dx <- (xr - xl) / ndx
+      knots <- seq(xl - bdeg * dx, xr + bdeg * dx, by = dx)
+      B <- splines::spline.des(knots, x, bdeg + 1, 0 * x, outer.ok = TRUE)$design
+      B
+    }
+
+    rescale.row <- function(A,vec){
+      t(apply(A, 1, function(x, vec) x*vec, vec=vec))
+    }
+
+    # deal with the covariate matrix 'C'
+    if (is.null(C)) {
+      X.cov <- data.frame(intercept=rep(1,n))
+      form.cov <- paste(" -1 + ", " intercept ")
+      form1 <- stats::as.formula(paste("y", form.cov, sep=" ~" ))
+      # NOTE: if we want to pass a formula as an input we need to do work here in 'form1'
+    } else {
+      X.cov <- data.frame(intercept=1, C)
+      colnames(X.cov) <- c("intercept", paste("cov",1:ncol(C), sep = ""))
+      if (!is.null(names.covariates) & length(names.covariates)==ncol(C)) colnames(X.cov) <- c("intercept", names.covariates)
+      form.cov <- paste(" -1 + ", paste(colnames(X.cov), collapse = " + "))
+      form1 <- stats::as.formula(paste("y", form.cov, sep=" ~" ))
+      # NOTE: if we want to pass a formula as an input we need to do work here in 'form1'
+    }
+
+    # compute cubic b-spline basis (Eilers basis):
+    B <- bspline(x=omega, ndx=L-3, bdeg=3)
+    B.pred <- bspline(x=seq(min(omega),max(omega),length.out=1000), ndx=L-3, bdeg=3)
+
+    ### Gaussian case ###
+    if (model=="Gaussian") {
+
+      stop("model='Gaussian' not available yet", call. = FALSE)
+
+    } else {
+
+      ### non Gaussian cases (Binomial, Negative Binomial, Poisson) ###
+
+      Z.tilde <- matrix(NA, nrow = n, ncol = L)
+      for(i in 1:L){
+        Z.tilde[,i] <-  rescale.row(G, B[,i]) %*% (t(G) %*% x)
+      }
+
+      stk <- INLA::inla.stack(data=list(y=y, E = E),
+                              A=list(1, Z.tilde, diag(n)),
+                              effects=list(X.cov,
+                                           id.beta=1:L,
+                                           id.z = 1:n))
+
+      if (eCAR.model=="besag"){
+
+        form2 <- y ~ . +
+          f(id.beta,
+            model = rw.ord,
+            scale.model = TRUE, constr=FALSE,
+            hyper = list(prec=list(
+              prior="pc.prec",
+              param=c(pcprior.sd[1]/0.31, 0.01)))) +
+          f(id.z, model = "besag",
+            graph = INLA:::inla.matrix2graph(R),
+            scale.model = TRUE, constr = TRUE,
+            hyper = list(prec=list(
+              prior="pc.prec",
+              param=c(pcprior.sd[2]/0.31, 0.01))))
+
+      } else if (eCAR.model=="bym"){
+
+        form2 <- y ~ . +
+          f(id.beta,
+            model = rw.ord,
+            scale.model = TRUE,
+            constr=FALSE,
+            hyper = list(prec=list(
+              prior="pc.prec",
+              param=c(pcprior.sd[1]/0.31, 0.01)))) +
+          f(id.z, model = "bym2",
+            graph = INLA:::inla.matrix2graph(R),
+            scale.model = TRUE, constr = TRUE,
+            hyper=list(
+              phi = list(
+                prior = "pc",
+                param = c(0.5, 2/3), initial = -3),
+              # this 'param' may be set by the user
+              prec = list(
+                prior = "pc.prec",
+                param = c(pcprior.sd[2]/0.31, 0.01), initial = 5)))
+
+      } else stop("invalid eCAR.model specification; it can either be 'besag' or 'bym' ", call. = FALSE)
+
+      #  likelihood Negative Binomial
+      if (model=="Negative Binomial"){
+        res <- INLA::inla(stats::update.formula(form1,form2),
+                          data = INLA::inla.stack.data(stk),
+                          family='nbinomial', E=E,
+                          control.family = list(
+                            variant=0,
+                            hyper=list(theta= list(
+                              prior="normal", param=c(0,1/s2)))),
+                          control.predictor = list(A = INLA::inla.stack.A(stk),
+                                                   compute=TRUE),
+                          control.compute = list(dic=TRUE, config=TRUE),
+                          verbose=verbose, ...)
+      }
+
+      #  likelihood Binomial
+      if (model=="Binomial"){
+        res <- INLA::inla(stats::update.formula(form1,form2),
+                          data = INLA::inla.stack.data(stk),
+                          family='binomial', Ntrials=E,
+                          control.predictor = list(A = INLA::inla.stack.A(stk),
+                                                   compute=TRUE),
+                          control.compute = list(dic=TRUE, config=TRUE),
+                          verbose=verbose, ...)
+      }
+
+      # likelihood 'Poisson'
+      if (model=="Poisson"){
+        res <- INLA::inla(stats::update.formula(form1,form2),
+                          data = INLA::inla.stack.data(stk),
+                          family='poisson', E=E,
+                          control.predictor = list(A = INLA::inla.stack.A(stk),
+                                                   compute=TRUE),
+                          control.compute = list(dic=TRUE, config=TRUE),
+                          verbose=verbose, ...)
+      }
+    }
+
+    # sample from the posterior and compute beta_omega
+    L.supported = sum(colSums(B) != 0)
+    sample.tmp <- INLA::inla.posterior.sample(1000,res)
+    splinecoefs <- matrix(nrow=L.supported, ncol=1000)
+    # prec.beta <- matrix(nrow=1, ncol=1000)
+    # prec.z <- matrix(nrow=1, ncol=1000)
+    # lambda.z <- matrix(nrow=1, ncol=1000)
+    ind.beta <- c(paste("id.beta:",1:L.supported, sep=""))
+    for(j in 1:1000){
+      splinecoefs[,j] <- (sample.tmp[[j]]$latent)[ind.beta,]
+      # prec.beta[1,j] <- sample.tmp[[j]]$hyperpar["Precision for id.beta"]
+      # prec.z[1,j] <- sample.tmp[[j]]$hyperpar["Precision for id.z"]
+      # lambda.z[1,j] <- sample.tmp[[j]]$hyperpar["Beta for id.z"]
+    }
+
+    # ARRANGE OUTPUT, MAKE THE TWO CASES: exp(beta_omega); beta_omega
+    # default for non-Gaussian case: exp(beta_omega)
+    if (model=="Gaussian") {
+      #### do a check of this below, when you implement model='Gaussian'
+      # beta.mn <- apply(B.pred[,which(colSums(B) != 0)]%*%splinecoefs, 1, base::mean)
+      # beta.q025 <- apply(B.pred[,which(colSums(B) != 0)]%*%splinecoefs, 1, stats::quantile, 0.025)
+      # beta.q975 <- apply(B.pred[,which(colSums(B) != 0)]%*%splinecoefs, 1, stats::quantile, 0.975)
+
+    } else {
+
+      beta.mn <- apply(exp(B.pred[,which(colSums(B) != 0)]%*%splinecoefs), 1, base::mean)
+      beta.q025 <- apply(exp(B.pred[,which(colSums(B) != 0)]%*%splinecoefs), 1, stats::quantile, 0.025)
+      beta.q975 <- apply(exp(B.pred[,which(colSums(B) != 0)]%*%splinecoefs), 1, stats::quantile, 0.975)
+      causal.beta <- c(exp(B.pred[1000,which(colSums(B) != 0)]%*%splinecoefs) )
+
+    }
+
+    # REGR COEF
+    if (model=="Gaussian") {
+
+      #### do a check of this below, when you implement model='Gaussian'
+      # fixed <- res$summary.fixed[,c("mean", "sd", "0.025quant", "0.975quant")]
+      # rownames(fixed) <- colnames(X.cov)
+
+    } else {
+
+      fixed.list <- lapply(res$marginals.fixed, FUN=function(x) INLA::inla.zmarginal(INLA::inla.tmarginal(function(a) exp(a), x), silent=TRUE))
+      fixed.tmp <- matrix(unlist(lapply(fixed.list, data.frame)), nrow=length(fixed.list), ncol=7, byrow=TRUE)
+      colnames(fixed.tmp) <- c("mean_exp", "sd", "0.025quant", "0.25quant", "0.5quant", "0.75quant", "0.975quant")
+      rownames(fixed.tmp) <- colnames(X.cov)#c("intercept", paste("exp", names(fixed.list)[-1], sep="_"))
+      fixed.tmp["intercept",] <- unlist(res$summary.fixed["intercept",])
+      fixed <- fixed.tmp[, c("mean_exp", "sd", "0.025quant", "0.975quant")]
+
+    }
+
+    # produce 'out'
+    out <- eCAR.out(data_model = model,
+                    beta_omega_n = causal.beta,
+                    beta_omega = data.frame(beta.mn = beta.mn,
+                                            beta.q025 = beta.q025,
+                                            beta.q975 = beta.q975,
+                                            omega = seq(min(omega),max(omega),length.out=1000)),
+                    posterior_draws = list(postsample.beta=splinecoefs,
+                                           # postsample.prec.beta=as.numeric(prec.beta),
+                                           # postsample.prec.z=as.numeric(prec.z),
+                                           # postsample.lambda.z=as.numeric(lambda.z),
+                                           B.pred = B.pred),
+                    DIC=res$dic$dic,
+                    regrcoef = as.data.frame(fixed))
+  } else {
+
+    # method == "naive"
+    stop("method='naive' not available yet", call. = FALSE)
+  }
+
+  return(out)
+}
+
+
+#### Leroux case (OBSOLETE!!! this was used in the spectral paper)
+# E: offset
+# e.g. with NegBin likelihood E=E (e.g. scale(pop,center=F))
+#      with Bin likelihood Ntrials=E
 # y: data vector (possibly including NA) of length n
 # x: exposure data vector of length n
 # W: matrix n x n with 1 if i~j otherwise 0
@@ -411,5 +659,9 @@ semipar.eCAR.Leroux <- function(y, x, W, E, C=NULL,
   }
   return(out)
 }
+
+
+
+
 
 
