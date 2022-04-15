@@ -5,7 +5,7 @@
 par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
                     joint_prior_lamx_lamz = FALSE,
                     lamx.fix.val = NULL, sig2x.fix.val = NULL,
-                    mb=0,s2b=10,ma=0,s2a=10.0,alamx=1,blamx=1,alamz=1,blamz=1,
+                    mb=0,s2b=10,mg=0,s2g=10.0,alamx=1,blamx=1,alamz=1,blamz=1,
                     asig=1,bsig=1,atau=1,btau=1,asigx=1,bsigx=1,
                     mb0=0,s2b0=100,me=0,s2e=100,mx=0, s2x=100,
                     tau_cand_sd=1, sig2_cand_sd=1,
@@ -72,7 +72,7 @@ par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
 
   modelPriors = c(mb, s2b, alamx, blamx, alamz, blamz, asig, bsig,
                   atau, btau, asigx, bsigx, mb0, s2b0, me, s2e, mx, s2x,
-                  ma, s2a)
+                  mg, s2g)
   MHsd <- c(tau_cand_sd, sig2_cand_sd)
   beta0 <- beta <- alpha <- tau <- sig2 <- rep(1, nout)
   sig2x <- rep(sig2x.fix.val,nout)

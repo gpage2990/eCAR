@@ -150,11 +150,11 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 	double atau = modelPriors[8], btau=modelPriors[9]; // shape and scale for tau ~ Gamma(a,b)
 	double asigx = modelPriors[10], bsigx=modelPriors[11]; // shape and scale for sig2x ~ InvGamma(a,b)
 	double me = modelPriors[14], s2e=modelPriors[15]; // mean and variance for eta ~ N(me*j,se*I)
-    double ma = modelPriors[16], s2a = modelPriors[17]; // prior values for alpha ~ N(ma, s2a)
+    double ma = modelPriors[18], s2a = modelPriors[19]; // prior values for alpha ~ N(ma, s2a)
 
 	if(*verbose){
-    	Rprintf("Prior values are: mb=%f, s2b=%f, ma=%f, s2a=%f, alamx=%f, blamx=%f,\n alamz=%f, blamz=%f, asig=%f, bsig=%f, \n atau=%f, btau=%f, asigx=%f, bsigx=%f\n",
-              mb, s2b, mb, s2b,  alamx,blamx,alamz,blamz,asig, bsig, atau, btau,asigx, bsigx);
+    	Rprintf("Prior values are: mb=%0.1f, s2b=%0.1f, ma=%0.1f, s2a=%0.1f, alamx=%0.1f, blamx=%0.1f,\n alamz=%0.1f, blamz=%0.1f, asig=%0.1f, bsig=%0.1f, \n atau=%0.1f, btau=%0.1f, asigx=%0.1f, bsigx=%0.1f\n",
+              mb, s2b, ma, s2a,  alamx,blamx,alamz,blamz,asig, bsig, atau, btau,asigx, bsigx);
 //	  if(*joint_prior_lamx_lamz) Rprinf("Prior Pr(lam_z > lam_x) = 1 \n");
 	}
 	GetRNGstate();
