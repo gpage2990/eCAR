@@ -46,7 +46,8 @@
 
 void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *y, double *x,
 			                double *evals,  double *Cstar, int *ncov, double *modelPriors,
-			                double *MHsd, int *verbose, int* joint_prior_lamx_lamz, int *updateXparms,
+			                double *MHsd, int *verbose, int* joint_prior_lamx_lamz, 
+			                int *updateXparms, double *lamx_fix, double *sig2x_fix,
 			                double *beta, double *alpha, double *tau, double *sig2x, double *lamx,
 			                double *lamz, double *sig2, double *eta){
 
@@ -87,18 +88,13 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 	//
 	// ===================================================================================
 
-	double sig2x_iter=sig2x[0], lamx_iter=lamx[0];
+	double sig2x_iter=*sig2x_fix, lamx_iter=*lamx_fix;
 	double beta_iter=0, alpha_iter=1;
   	double lamz_iter=0.35, tau_iter=1.0;
   	double sig2_iter = 0.5;
 	double *eta_iter = R_VectorInit(*ncov, 0.0);
 
-	sig2x_iter=0.2*0.2, lamx_iter=0.5;
-	beta_iter=0, alpha_iter=0.9;
-  	lamz_iter=0.75, tau_iter=0.0076;
-  	sig2_iter = 0.5*0.5;
-	
- 
+
 	// ===================================================================================
 	//
 	// scratch vectors of memory needed to update parameters
@@ -390,7 +386,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 
       		Sstar[3] = Sstar[3] + sqrt((1.0 - lamx_iter + lamx_iter*evals[j])/(1.0 - lamz_iter + lamz_iter*evals[j]))*x[j]*
 		                          1/(tau_iter/(1.0 - lamz_iter + lamz_iter*evals[j]) + sig2_iter)*
-		                        sqrt((1.0 - lamx_iter + lamx_iter*evals[j])/(1.0 - lamz_iter + lamz_iter*evals[j]))*x[j];
+		                          sqrt((1.0 - lamx_iter + lamx_iter*evals[j])/(1.0 - lamz_iter + lamz_iter*evals[j]))*x[j];
 
 
 
@@ -482,6 +478,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
     	}
 
 
+
 		//////////////////////////////////////////////////////////////////////////////////
 		//																				                                      //
 		// Save MCMC iterates															                              //
@@ -493,7 +490,7 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 			lamx[ii] = lamx_iter;
       		tau[ii] = tau_iter;
       		sig2[ii] = sig2_iter;
-      		sig2x[ii] = sig2x_iter;
+            sig2x[ii] = sig2x_iter;
       		beta[ii] = beta_iter;
       		alpha[ii] = alpha_iter;
       		for(b=0; b<*ncov; b++){
@@ -504,7 +501,6 @@ void mcmcloop_leroux_gauss(int *draws, int *burn, int *thin, int *nobs, double *
 		}
 
 	}
-
 	PutRNGstate();
 
 
