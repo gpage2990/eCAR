@@ -13,7 +13,8 @@ par.eCAR.Leroux(y, x, W,
                 joint_prior_lamx_lamz = FALSE,
                 lamx.fix.val = NULL,
                 sig2x.fix.val = NULL,
-                m=0, s2=10,
+                mb=0,s2b=10,
+                mg=0,s2g=10.0,
                 alamx=1, blamx=1,
                 alamz=1, blamz=1,
                 asig=1, bsig=1,
@@ -55,9 +56,14 @@ par.eCAR.Leroux(y, x, W,
 
 \item{sig2x.fix.val}{If a value is supplied then sigma2_x is not updated in the MCMC algorithm, but rather treated as the fixed known supplied value}
 
-\item{m}{prior mean for (beta, gamma), where gamma = rho*(sigz/sigx).  default is 0.}
+\item{mb}{prior mean for beta.  default is 0.}
 
-\item{s2}{prior variance for (beta, gamma),where gamma = rho*(sigz/sigx). default is 10}
+\item{s2b}{prior variance for beta. default is 10}
+
+\item{mg}{prior mean for gamma, where gamma = rho*(sigz/sigx).  default is 0.}
+
+\item{s2g}{prior variance for, gamma), where gamma = rho*(sigz/sigx). default is 10}
+
 
 \item{alamx}{prior shape1 parameter for lam.x, default is 1. Only used if joint_prior_lamx_lamz = FALSE}
 
@@ -161,7 +167,7 @@ E <- lipcancer$data$expected
 set.seed(101)
 fit1 <- par.eCAR.Leroux(y=Y, x=X, W=W, E=E, C=NULL, model="Poisson",
                          draws=10000, burn=5000, thin=1, verbose=FALSE,
-                         joint_prior_lamx_lamz=FALSE, m=0, s2=4)
+                         joint_prior_lamx_lamz=FALSE)
 
 
 plot(fit1)

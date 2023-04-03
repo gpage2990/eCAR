@@ -14,7 +14,7 @@ semipar.eCAR(y, x, W, E,
                        pcprior.sd=c(0.1,1),
                        s2=10,
                        method = "spectral",
-                       num.threads.inla = NULL,
+                       num.threads.inla = 1,
                        verbose=FALSE, ...)
 }
 \arguments{

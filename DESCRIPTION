@@ -1,7 +1,7 @@
 Package: eCAR
 Type: Package
 Title: Eigenvalue CAR Models
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
   person(given = "Garritt", family = "L. Page", email = "page@stat.byu.edu", role = c("aut", "cre")),
   person(given = "Massimo", family = "Ventrucci", email = "massimo.ventrucci@unibo.it", role = c("aut")),

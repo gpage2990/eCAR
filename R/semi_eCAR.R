@@ -221,7 +221,6 @@ semipar.eCAR <- function(y, x, W, E, C=NULL,
 
     # produce 'out'
     out <- eCAR.out(data_model = model,
-                    beta_omega_n = causal.beta,
                     beta_omega = data.frame(beta.mn = beta.mn,
                                             beta.q025 = beta.q025,
                                             beta.q975 = beta.q975,

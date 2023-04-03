@@ -13,14 +13,12 @@
 
 eCAR.out <- function(
   data_model = NULL,
-  beta_omega_n = NULL,
   beta_omega = NULL,
   posterior_draws = NULL,
   DIC = NULL,
   regrcoef =NULL
 ){
   value <- list(data_model = data_model,
-                beta_omega_n = beta_omega_n ,
                 beta_omega = beta_omega,
                 posterior_draws = posterior_draws,
                 DIC=DIC,

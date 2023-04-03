@@ -2,14 +2,24 @@
 
 
 # Wrapper to fit the joint Leroux model
-par.eCAR.Leroux <- function(y,x,W,E=NULL,C=NULL,model="Gaussian",
-                    joint_prior_lamx_lamz = FALSE,
-                    lamx.fix.val = NULL, sig2x.fix.val = NULL,
-                    mb=0,s2b=10,mg=0,s2g=10.0,alamx=1,blamx=1,alamz=1,blamz=1,
-                    asig=1,bsig=1,atau=1,btau=1,asigx=1,bsigx=1,
-                    mb0=0,s2b0=100,me=0,s2e=100,mx=0, s2x=100,
-                    tau_cand_sd=1, sig2_cand_sd=1,
-                    draws=10000,burn=5000,thin=5, verbose=TRUE){
+par.eCAR.Leroux <- function(y,x,W,
+                            E=NULL,
+                            C=NULL,
+                            model="Gaussian",
+                            joint_prior_lamx_lamz = FALSE,
+                            lamx.fix.val = NULL, sig2x.fix.val = NULL,
+                            mb=0,s2b=10,
+                            mg=0,s2g=10.0,
+                            alamx=1,blamx=1,
+                            alamz=1,blamz=1,
+                            asig=1,bsig=1,
+                            atau=1,btau=1,
+                            asigx=1,bsigx=1,
+                            mb0=0,s2b0=100,
+                            me=0,s2e=100,
+                            mx=0, s2x=100,
+                            tau_cand_sd=1, sig2_cand_sd=1,
+                            draws=10000,burn=5000,thin=5, verbose=TRUE){
   # W - is the neighborhood matrix
   # C - is the matrix of confounder covariates that are included not
 
